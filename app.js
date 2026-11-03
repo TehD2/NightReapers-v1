@@ -2,6 +2,10 @@ const $ = id => document.getElementById(id);
 
 const STORAGE_KEY = "nightreapers_v1";
 
+// ========================================
+//             DATA & STORAGE
+// ========================================
+
 function loadData() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -19,9 +23,21 @@ function loadData() {
 
 let data = loadData();
 
+// Preserve existing v1 records while introducing a saved-vehicle garage.
+if (!Array.isArray(data.vehicles)) data.vehicles = [];
+if (!data.settings || typeof data.settings !== "object") {
+  data.settings = { rate: 0, weekStart: 5 };
+}
+
+let editingVehicleId = null;
+
 function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
+
+// ========================================
+//              FORMAT HELPERS
+// ========================================
 
 function money(amount) {
   return new Intl.NumberFormat("en-CA", {
@@ -55,6 +71,8 @@ function timeText(timestamp) {
   });
 }
 
+// ============ PAYROLL WEEK ============
+
 function weekBounds() {
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -65,6 +83,10 @@ function weekBounds() {
   end.setDate(end.getDate() + 7);
   return [start.getTime(), end.getTime()];
 }
+
+// ========================================
+//                DASHBOARD
+// ========================================
 
 function render() {
   const [from, to] = weekBounds();
@@ -105,6 +127,8 @@ function render() {
   renderHistory();
 }
 
+
+// ============ ROUTE HISTORY ============
 
 function renderHistory(showAll = false) {
   const container = $("routeHistory");
@@ -181,12 +205,20 @@ function renderHistory(showAll = false) {
 }
 
 
+// ========================================
+//              ROUTE TRACKING
+// ========================================
+
+// ============ START ROUTE ============
+
 $("startBtn").addEventListener("click", () => {
   if (data.active) return;
 
-  $("truckNumber").value = data.vehicle?.truck || "";
-  $("plate").value = data.vehicle?.plate || "";
-  $("rememberTruck").checked = !!data.vehicle;
+  const selected = data.vehicles.find(vehicle => vehicle.id === data.selectedVehicleId);
+  const remembered = selected || data.vehicle;
+  $("truckNumber").value = remembered?.truck || "";
+  $("plate").value = remembered?.plate || "";
+  $("rememberTruck").checked = !!remembered;
   $("startKm").value = "";
   $("startDialog").showModal();
 });
@@ -201,7 +233,8 @@ $("startForm").addEventListener("submit", event => {
 
   if (!truck || !plate || !Number.isFinite(startKm) || startKm < 0) return;
 
-  data.vehicle = $("rememberTruck").checked ? {truck, plate} : null;
+  // Keep the garage selection independent of the legacy Remember checkbox.
+  data.vehicle = $("rememberTruck").checked ? { truck, plate } : null;
   data.active = {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
     truck,
@@ -215,6 +248,8 @@ $("startForm").addEventListener("submit", event => {
   $("startDialog").close();
   render();
 });
+
+// ============ END ROUTE ============
 
 $("endBtn").addEventListener("click", () => {
   if (!data.active) return;
@@ -251,25 +286,47 @@ $("endForm").addEventListener("submit", event => {
 });
 
 
-/* ===== SETTINGS SCREEN NAVIGATION ===== */
+// ========================================
+//            SCREEN NAVIGATION
+// ========================================
 
-$("settingsBtn").addEventListener("click", () => {
+function showDashboard() {
+  $("settingsScreen").hidden = true;
+  $("vehicleScreen").hidden = true;
+  document.querySelector(".earnings").hidden = false;
+  document.querySelector(".controls").hidden = false;
+  document.querySelector(".history").hidden = false;
+  $("settingsBtn").hidden = false;
+  render();
+}
+
+function showSettings() {
+  $("vehicleScreen").hidden = true;
   $("settingsScreen").hidden = false;
   document.querySelector(".earnings").hidden = true;
   document.querySelector(".controls").hidden = true;
   document.querySelector(".history").hidden = true;
   $("activePanel").hidden = true;
   $("settingsBtn").hidden = true;
+}
+
+$("settingsBtn").addEventListener("click", showSettings);
+$("backDashboardBtn").addEventListener("click", showDashboard);
+$("backVehicleSettingsBtn").addEventListener("click", showSettings);
+
+$("payInfoBtn").addEventListener("click", () => {
+  $("hourlyRate").value = data.settings.rate ?? 0;
+  $("weekStart").value = String(data.settings.weekStart ?? 5);
+  $("settingsDialog").showModal();
 });
 
-$("backDashboardBtn").addEventListener("click", () => {
+$("vehicleInfoBtn").addEventListener("click", () => {
   $("settingsScreen").hidden = true;
-  document.querySelector(".earnings").hidden = false;
-  document.querySelector(".controls").hidden = false;
-  document.querySelector(".history").hidden = false;
-  $("settingsBtn").hidden = false;
-  render();
+  $("vehicleScreen").hidden = false;
+  renderVehicles();
 });
+
+// ============ PAY INFORMATION ============
 
 $("settingsForm").addEventListener("submit", event => {
   event.preventDefault();
@@ -280,11 +337,111 @@ $("settingsForm").addEventListener("submit", event => {
   render();
 });
 
+// ========================================
+//             VEHICLE GARAGE
+// ========================================
+
+function clearVehicleForm() {
+  editingVehicleId = null;
+  $("vehicleForm").reset();
+  $("vehicleForm").querySelector('button[type="submit"]').textContent = "SAVE VEHICLE";
+}
+
+function renderVehicles() {
+  const selected = data.vehicles.find(vehicle => vehicle.id === data.selectedVehicleId);
+  $("currentVehicleDisplay").textContent = selected
+    ? `${selected.nickname || `Truck ${selected.truck}`} • ${selected.plate}`
+    : "No vehicle selected.";
+
+  const list = $("savedVehiclesList");
+  list.replaceChildren();
+  if (!data.vehicles.length) {
+    list.textContent = "No saved vehicles yet.";
+    return;
+  }
+
+  for (const vehicle of data.vehicles) {
+    const item = document.createElement("div");
+    item.style.marginBottom = "12px";
+
+    const label = document.createElement("div");
+    label.textContent = `${vehicle.nickname || `Truck ${vehicle.truck}`} — ${vehicle.truck} • ${vehicle.plate}`;
+    label.style.marginBottom = "8px";
+    item.appendChild(label);
+
+    const actions = document.createElement("div");
+    actions.className = "dialog-actions";
+    actions.style.marginTop = "0";
+
+    const useButton = document.createElement("button");
+    useButton.type = "button";
+    useButton.className = "start";
+    useButton.textContent = vehicle.id === data.selectedVehicleId ? "SELECTED" : "SELECT";
+    useButton.disabled = vehicle.id === data.selectedVehicleId;
+    useButton.addEventListener("click", () => {
+      data.selectedVehicleId = vehicle.id;
+      data.vehicle = { truck: vehicle.truck, plate: vehicle.plate };
+      save();
+      renderVehicles();
+    });
+
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.className = "cancel";
+    editButton.textContent = "EDIT";
+    editButton.addEventListener("click", () => {
+      editingVehicleId = vehicle.id;
+      $("vehicleNickname").value = vehicle.nickname;
+      $("vehicleTruckNumber").value = vehicle.truck;
+      $("vehiclePlate").value = vehicle.plate;
+      $("vehicleForm").querySelector('button[type="submit"]').textContent = "UPDATE VEHICLE";
+      $("vehicleNickname").focus();
+    });
+
+    actions.append(useButton, editButton);
+    item.appendChild(actions);
+    list.appendChild(item);
+  }
+}
+
+$("cancelVehicleEdit").addEventListener("click", clearVehicleForm);
+
+$("vehicleForm").addEventListener("submit", event => {
+  event.preventDefault();
+  const nickname = $("vehicleNickname").value.trim();
+  const truck = $("vehicleTruckNumber").value.trim();
+  const plate = $("vehiclePlate").value.trim();
+  if (!truck || !plate) return;
+
+  if (editingVehicleId) {
+    const existing = data.vehicles.find(vehicle => vehicle.id === editingVehicleId);
+    if (existing) Object.assign(existing, { nickname, truck, plate });
+  } else {
+    const id = typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random()}`;
+    data.vehicles.push({ id, nickname, truck, plate });
+    if (!data.selectedVehicleId) data.selectedVehicleId = id;
+  }
+
+  const selected = data.vehicles.find(vehicle => vehicle.id === data.selectedVehicleId);
+  if (selected) data.vehicle = { truck: selected.truck, plate: selected.plate };
+  save();
+  clearVehicleForm();
+  renderVehicles();
+});
+
+// ============ DIALOG CONTROLS ============
+
 document.querySelectorAll("[data-close]").forEach(button => {
   button.addEventListener("click", () => {
     $(button.dataset.close).close();
   });
 });
+
+// ========================================
+//              SHIFT REPORTS
+// ========================================
 
 function addReportRow(container, label, value) {
   const row = document.createElement("div");
@@ -331,7 +488,7 @@ function showReport(route) {
 }
 
 
-/* ===== SHIFT REPORT CLOSE CONFIRMATION ===== */
+// ============ CLOSE CONFIRMATION ============
 
 const reportDialog = $("reportDialog");
 
@@ -365,7 +522,11 @@ $("confirmCloseNo").addEventListener("click", () => {
   reportConfirm.classList.remove("visible");
 });
 
+// ============ HISTORY EXPANSION ============
+
 $("viewAllBtn").addEventListener("click", () => renderHistory(true));
+
+// ============ BACKUP EXPORT ============
 
 $("exportBtn").addEventListener("click", () => {
   const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -380,7 +541,9 @@ $("exportBtn").addEventListener("click", () => {
 });
 
 
-/* ===== SLEEP MODE FADE IN / OUT ===== */
+// ========================================
+//              SLEEP MODE
+// ========================================
 
 const sleepScreen = $("sleepScreen");
 
@@ -408,7 +571,11 @@ sleepScreen.addEventListener("click", () => {
 setInterval(render, 1000);
 render();
 
-/* ===== WAITING REAPER BLINK ANIMATION ===== */
+// ========================================
+//             STARTUP SCENE
+// ========================================
+
+// ============ REAPER BLINK ============
 
 const startupReaper = document.getElementById("startupReaper");
 
@@ -432,7 +599,7 @@ if (startupReaper) {
   setInterval(blinkReaper, 6000);
 }
 
-/* ===== STARTUP TO DASHBOARD ===== */
+// ============ STARTUP TRANSITION ============
 
 const startupScreen = document.getElementById("startupScreen");
 
@@ -455,7 +622,9 @@ if (startupScreen) {
   }, 8000);
 }
 
-/* ===== WAITING MODE ===== */
+// ========================================
+//              WAITING MODE
+// ========================================
 
 const waitingModeBtn = document.getElementById("waitingModeBtn");
 
@@ -476,7 +645,7 @@ if (waitingModeBtn && startupScreen) {
   });
 }
 
-/* ===== EXIT WAITING MODE ===== */
+// ============ EXIT WAITING MODE ============
 
 if (startupScreen) {
   startupScreen.addEventListener("click", () => {
