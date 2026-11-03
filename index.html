@@ -29,13 +29,13 @@
         alt="NightReapers waiting under the stars"
       >
     </div>
-
+<!-- ============ START UP ============ -->
     <div class="startup-title">
       <h1>NightReapers</h1>
       <p>PERSONAL LOGGER</p>
     </div>
   </div>
-
+<!-- ============ HEADER ============ -->
   <main class="app">
     <header class="header">
       <div>
@@ -49,7 +49,7 @@
         >☕ Support the Reaper</a>
       </div>
     </header>
-
+<!-- ============ TOP PORTION ============ -->
     <section class="panel earnings">
       <h2>Weekly Gross <span>(Estimated)</span></h2>
       <div class="money" id="weeklyGross">$0.00</div>
@@ -70,12 +70,12 @@
         </div>
       </div>
     </section>
-    
+<!-- ============ MIDDLE PORTION A ============ -->
     <div class="controls">
       <button class="start" id="startBtn">START ROUTE</button>
       <button class="end" id="endBtn" disabled>END ROUTE</button>
     </div>
-
+<!-- ============ MIDDLE PORTION B ============ -->
     <button class="settings-main-btn" id="settingsBtn" type="button">
       SETTINGS
     </button>
@@ -87,14 +87,14 @@
       <p>Current estimated gross: <strong id="livePay">$0.00</strong></p>
 
       
-    <!-- ===== ROUTE MODE CONTROLS ===== -->
+<!-- ===== ROUTE MODE CONTROLS ===== -->
     <div id="routeModeControls" class="route-mode-controls" hidden>
       <button class="sleep-btn" id="sleepBtn" type="button">☾ Sleep Mode</button>
       <button class="sleep-btn" id="waitingModeBtn" type="button">🧸 Waiting Mode</button>
     </div>
 
     </section>
-
+<!-- ===== LOWER PORTION ===== -->
     <section class="panel history">
       <div class="history-heading">
         <h2>Route History</h2>
@@ -114,10 +114,66 @@
       PAY INFORMATION
     </button>
 
+<!-- ======================================== -->
+<!--          VEHICLE INFORMATION             -->
+<!-- ======================================== -->
     <button type="button" id="vehicleInfoBtn" class="settings-option">
       VEHICLE INFORMATION
     </button>
 
+<!-- ===== VEHICLE INFORMATION SCREEN ===== -->
+<section id="vehicleScreen" class="vehicle-screen" hidden>
+  <div class="settings-screen-panel">
+    <h2>VEHICLE INFORMATION</h2>
+<!-- ============ CURRENT VEHICLE ============ -->
+    <h3>CURRENT VEHICLE</h3>
+    <div id="currentVehicleDisplay">
+      No vehicle selected.
+    </div>
+<!-- ============ SAVED VEHICLES ============= -->
+    <h3>SAVED VEHICLES</h3>
+    <div id="savedVehiclesList">
+      No saved vehicles yet.
+    </div>
+<!-- ============ ADD / EDIT VEHICLE ========= -->
+    <h3>ADD / EDIT VEHICLE</h3>
+    <form id="vehicleForm">
+      <label>
+        Vehicle Nickname (Optional)
+        <input id="vehicleNickname" autocomplete="off">
+      </label>
+
+      <label>
+        Truck Number
+        <input id="vehicleTruckNumber" required autocomplete="off">
+      </label>
+
+      <label>
+        License Plate
+        <input id="vehiclePlate" required autocomplete="off">
+      </label>
+
+      <div class="dialog-actions">
+        <button type="button" class="cancel" id="cancelVehicleEdit">
+          CLEAR
+        </button>
+        <button type="submit" class="start">
+          SAVE VEHICLE
+        </button>
+      </div>
+    </form>
+
+    <button type="button"
+            id="backVehicleSettingsBtn"
+            class="settings-option">
+      BACK TO SETTINGS
+    </button>
+  </div>
+</section>
+
+<!-- ======================================== -->
+<!--          EDIT ROUTE HISTORY              -->
+<!-- ======================================== -->
     <button type="button" id="editHistoryBtn" class="settings-option">
       EDIT ROUTE HISTORY
     </button>
@@ -131,7 +187,7 @@
 </section>
     
   </main>
-
+<!-- ============ START ROUTE ============ -->
   <dialog id="startDialog">
     <form id="startForm">
       <h2>Start Route</h2>
@@ -154,7 +210,7 @@
       </div>
     </form>
   </dialog>
-
+<!-- ============ END ROUTE ============ -->
   <dialog id="endDialog">
     <form id="endForm">
       <h2>End Route</h2>
