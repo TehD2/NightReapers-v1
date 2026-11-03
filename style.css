@@ -726,3 +726,62 @@ body::after {
     z-index: -1 !important;
 }
   
+
+/* ===== NIGHTREAPERS SETTINGS SCREEN ===== */
+
+.settings-screen[hidden] {
+  display: none !important;
+}
+
+.settings-screen {
+  width: 100%;
+  max-width: 508px;
+  margin: 0 auto;
+}
+
+.settings-screen-panel {
+  position: relative;
+  min-height: 600px;
+  padding: 24px 20px 65px;
+  background: linear-gradient(145deg, #26282c, #151619);
+  border: 1px solid #777;
+  border-radius: 16px;
+  box-sizing: border-box;
+}
+
+.settings-screen-panel h2 {
+  text-align: center;
+  font-size: 30px;
+  margin: 0 0 28px;
+}
+
+.settings-option {
+  display: block;
+  width: 100%;
+  margin-bottom: 22px;
+  padding: 18px 12px;
+  background: #26282c;
+  border: 1px solid #aaa;
+  border-radius: 14px;
+  color: white;
+  font-size: clamp(16px, 4vw, 26px);
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+}
+
+.settings-option:active {
+  border-color: #b66ad9;
+  background: #34303b;
+}
+
+.settings-version {
+  position: absolute;
+  bottom: 16px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0;
+}
