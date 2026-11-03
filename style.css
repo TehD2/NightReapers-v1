@@ -681,3 +681,15 @@ dialog .check { display: flex; align-items: center; gap: 10px; }
 .report-tap-hint {
   text-align: center;
 }
+
+/* Keep hexagon wallpaper visible behind the app */
+body::before,
+body::after {
+  z-index: 0;
+  pointer-events: none;
+}
+
+.app {
+  position: relative;
+  z-index: 1;
+}
