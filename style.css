@@ -706,4 +706,34 @@ body::after {
   background: transparent !important;
   box-shadow: none !important;
 }
-  
+
+/* NIGHTREAPERS — PURPLE EDGE GLOW */
+
+body {
+  background:
+    radial-gradient(
+      ellipse 32% 75% at 0% 45%,
+      rgba(161, 86, 205, 0.28),
+      transparent 100%
+    ),
+    radial-gradient(
+      ellipse 32% 75% at 100% 45%,
+      rgba(161, 86, 205, 0.28),
+      transparent 100%
+    ),
+    #0b0b0d;
+}
+
+/* Keep the hexagon wallpaper visible at the edges */
+body::before,
+body::after {
+  z-index: 0;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* Keep the app above the wallpaper */
+.app {
+  position: relative;
+  z-index: 1;
+}
