@@ -785,3 +785,65 @@ body::after {
   font-weight: 700;
   margin: 0;
 }
+
+/* ======================================== */
+/*          VEHICLE INFORMATION             */
+/* ======================================== */
+.vehicle-screen[hidden] {
+  display: none !important;
+}
+
+.vehicle-screen {
+  width: 100%;
+  max-width: 508px;
+  margin: 0 auto;
+}
+
+.vehicle-screen .settings-screen-panel {
+  min-height: 600px;
+}
+
+.vehicle-screen h3 {
+  color: var(--purple);
+  font-size: 15px;
+  letter-spacing: 2px;
+  margin: 24px 0 12px;
+}
+
+#currentVehicleDisplay,
+#savedVehiclesList {
+  padding: 16px;
+  background: #151619;
+  border: 1px solid #55565b;
+  border-radius: 12px;
+  color: var(--text);
+}
+
+#vehicleForm label {
+  display: block;
+  margin: 16px 0;
+  font-size: 14px;
+}
+
+#vehicleForm input {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px;
+  background: #111215;
+  border: 1px solid #555;
+  border-radius: 9px;
+  color: var(--text);
+}
+
+#vehicleForm input:focus {
+  outline: 1px solid var(--purple);
+}
+
+#vehicleForm .dialog-actions button {
+  min-width: 0;
+}
+
+.vehicle-screen .settings-option {
+  margin-top: 24px;
+}
