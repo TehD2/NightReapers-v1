@@ -15,8 +15,14 @@ body {
   min-height: 100vh;
   color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
-  background: var(--bg);
-}
+  background: radial-gradient(
+    ellipse at 50% 15%,
+    #a87ac4 0%,
+    #68417f 18%,
+    #291633 42%,
+    #0b0b0d 75%
+  );
+  background-attachment: fixed;
 
 body::before, body::after {
   content: "";
