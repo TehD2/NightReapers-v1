@@ -84,14 +84,23 @@ button:disabled { opacity: .35; cursor: not-allowed; }
   font-size: 12px;
 }
 
-.settings-btn {
-  position: absolute;
-  right: 0;
-  top: 20px;
-  border: 0;
-  background: none;
+.settings-main-btn {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #77777d;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #26282c, #151619);
   color: var(--text);
-  font-size: 28px;
+  font-size: 22px;
+  font-weight: 800;
+  text-align: center;
+  cursor: pointer;
+}
+
+.settings-main-btn:hover {
+  border-color: var(--purple);
+  box-shadow: 0 0 12px #a16ac944;
 }
 
 .panel {
@@ -185,9 +194,9 @@ button:disabled { opacity: .35; cursor: not-allowed; }
 .controls {
   display: flex;
   gap: 12px;
-  position: sticky;
-  bottom: 0;
-  padding: 12px 0;
+  position: relative;
+  bottom: auto;
+  padding: 0;
 }
 
 .controls button, .dialog-actions button {
