@@ -693,3 +693,10 @@ body::after {
   position: relative;
   z-index: 1;
 }
+
+/* Remove unwanted black rectangles */
+.header,
+.controls {
+  background: transparent !important;
+  box-shadow: none !important;
+}
