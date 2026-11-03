@@ -1,20 +1,31 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <meta name="theme-color" content="#0b0b0d">
-  <title>NightReapers</title>
-  <link rel="manifest" href="manifest.webmanifest">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="NightReapers">
+
+  <title>NightReapers</title>
+
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" href="assets/NR-W.png">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/NR-iOS.png">
-  <meta name="apple-mobile-web-app-title" content="NightReapers">
   <link rel="stylesheet" href="style.css">
+
   <script src="app.js" defer></script>
 </head>
+
 <body>
+
+  <!-- ======================================== -->
+  <!--             STARTUP SCREEN               -->
+  <!-- ======================================== -->
+
   <div id="startupScreen" class="startup-screen">
     <div class="startup-sky">
       <div class="startup-moon"></div>
@@ -24,34 +35,51 @@
 
     <div class="startup-character">
       <img
-        src="assets/waiting-reaper/WR-1.png"
         id="startupReaper"
+        src="assets/waiting-reaper/WR-1.png"
         alt="NightReapers waiting under the stars"
       >
     </div>
-<!-- ============ START UP ============ -->
+
     <div class="startup-title">
       <h1>NightReapers</h1>
       <p>PERSONAL LOGGER</p>
     </div>
   </div>
-<!-- ============ HEADER ============ -->
+
+  <!-- ======================================== -->
+  <!--              MAIN APP                    -->
+  <!-- ======================================== -->
+
   <main class="app">
+
+    <!-- ============ HEADER ============ -->
+
     <header class="header">
       <div>
         <h1>NightReapers</h1>
         <p>PERSONAL LOGGER</p>
+
         <a
           href="https://ko-fi.com/harveymccastle"
           target="_blank"
           rel="noopener noreferrer"
           class="kofi-link"
-        >☕ Support the Reaper</a>
+        >
+          ☕ Support the Reaper
+        </a>
       </div>
     </header>
-<!-- ============ TOP PORTION ============ -->
+
+    <!-- ======================================== -->
+    <!--                DASHBOARD                 -->
+    <!-- ======================================== -->
+
+    <!-- ============ WEEKLY EARNINGS ============ -->
+
     <section class="panel earnings">
       <h2>Weekly Gross <span>(Estimated)</span></h2>
+
       <div class="money" id="weeklyGross">$0.00</div>
       <div class="period" id="payPeriod">Current week</div>
 
@@ -60,180 +88,331 @@
           <small>Driving Hours</small>
           <strong id="weeklyHours">0h 00m</strong>
         </div>
+
         <div>
           <small>Total Kilometres</small>
           <strong id="weeklyKm">0 km</strong>
         </div>
+
         <div>
           <small>Completed Routes</small>
           <strong id="weeklyRoutes">0</strong>
         </div>
       </div>
     </section>
-<!-- ============ MIDDLE PORTION A ============ -->
+
+    <!-- ============ ROUTE BUTTONS ============ -->
+
     <div class="controls">
-      <button class="start" id="startBtn">START ROUTE</button>
-      <button class="end" id="endBtn" disabled>END ROUTE</button>
+      <button class="start" id="startBtn" type="button">
+        START ROUTE
+      </button>
+
+      <button class="end" id="endBtn" type="button" disabled>
+        END ROUTE
+      </button>
     </div>
-<!-- ============ MIDDLE PORTION B ============ -->
-    <button class="settings-main-btn" id="settingsBtn" type="button">
+
+    <!-- ============ SETTINGS BUTTON ============ -->
+
+    <button
+      class="settings-main-btn"
+      id="settingsBtn"
+      type="button"
+    >
       SETTINGS
     </button>
-    
+
+    <!-- ============ ACTIVE ROUTE ============ -->
+
     <section class="panel active-panel" id="activePanel" hidden>
       <div class="section-title">ROUTE ACTIVE</div>
       <div class="timer" id="routeTimer">00:00:00</div>
+
       <p id="activeTruck"></p>
-      <p>Current estimated gross: <strong id="livePay">$0.00</strong></p>
 
-      
-<!-- ===== ROUTE MODE CONTROLS ===== -->
-    <div id="routeModeControls" class="route-mode-controls" hidden>
-      <button class="sleep-btn" id="sleepBtn" type="button">☾ Sleep Mode</button>
-      <button class="sleep-btn" id="waitingModeBtn" type="button">🧸 Waiting Mode</button>
-    </div>
+      <p>
+        Current estimated gross:
+        <strong id="livePay">$0.00</strong>
+      </p>
 
+      <!-- ============ ROUTE MODE CONTROLS ============ -->
+
+      <div
+        id="routeModeControls"
+        class="route-mode-controls"
+        hidden
+      >
+        <button class="sleep-btn" id="sleepBtn" type="button">
+          ☾ Sleep Mode
+        </button>
+
+        <button class="sleep-btn" id="waitingModeBtn" type="button">
+          🧸 Waiting Mode
+        </button>
+      </div>
     </section>
-<!-- ===== LOWER PORTION ===== -->
+
+    <!-- ============ ROUTE HISTORY ============ -->
+
     <section class="panel history">
       <div class="history-heading">
         <h2>Route History</h2>
-        <button class="text-btn" id="viewAllBtn">View All ›</button>
+
+        <button class="text-btn" id="viewAllBtn" type="button">
+          View All ›
+        </button>
       </div>
+
       <div id="routeHistory" class="history-list">
         <p class="empty">No completed routes yet.</p>
       </div>
     </section>
 
-<!-- ===== SETTINGS SCREEN ===== -->
-<section id="settingsScreen" class="settings-screen" hidden>
-  <div class="settings-screen-panel">
-    <h2>SETTINGS</h2>
+    <!-- ======================================== -->
+    <!--             SETTINGS SCREEN              -->
+    <!-- ======================================== -->
 
-    <button type="button" id="payInfoBtn" class="settings-option">
-      PAY INFORMATION
-    </button>
+    <section id="settingsScreen" class="settings-screen" hidden>
+      <div class="settings-screen-panel">
+        <h2>SETTINGS</h2>
 
-<!-- ======================================== -->
-<!--          VEHICLE INFORMATION             -->
-<!-- ======================================== -->
-    <button type="button" id="vehicleInfoBtn" class="settings-option">
-      VEHICLE INFORMATION
-    </button>
+        <!-- ============ PAY INFORMATION ============ -->
 
-<!-- ===== VEHICLE INFORMATION SCREEN ===== -->
-<section id="vehicleScreen" class="vehicle-screen" hidden>
-  <div class="settings-screen-panel">
-    <h2>VEHICLE INFORMATION</h2>
-<!-- ============ CURRENT VEHICLE ============ -->
-    <h3>CURRENT VEHICLE</h3>
-    <div id="currentVehicleDisplay">
-      No vehicle selected.
-    </div>
-<!-- ============ SAVED VEHICLES ============= -->
-    <h3>SAVED VEHICLES</h3>
-    <div id="savedVehiclesList">
-      No saved vehicles yet.
-    </div>
-<!-- ============ ADD / EDIT VEHICLE ========= -->
-    <h3>ADD / EDIT VEHICLE</h3>
-    <form id="vehicleForm">
-      <label>
-        Vehicle Nickname (Optional)
-        <input id="vehicleNickname" autocomplete="off">
-      </label>
+        <button
+          type="button"
+          id="payInfoBtn"
+          class="settings-option"
+        >
+          PAY INFORMATION
+        </button>
+
+        <!-- ============ VEHICLE INFORMATION ============ -->
+
+        <button
+          type="button"
+          id="vehicleInfoBtn"
+          class="settings-option"
+        >
+          VEHICLE INFORMATION
+        </button>
+
+        <!-- ============ EDIT ROUTE HISTORY ============ -->
+
+        <button
+          type="button"
+          id="editHistoryBtn"
+          class="settings-option"
+        >
+          EDIT ROUTE HISTORY
+        </button>
+
+        <!-- ============ BACK TO DASHBOARD ============ -->
+
+        <button
+          type="button"
+          id="backDashboardBtn"
+          class="settings-option"
+        >
+          BACK TO DASHBOARD
+        </button>
+
+        <p class="settings-version">NightReapers v1.03</p>
+      </div>
+    </section>
+
+    <!-- ======================================== -->
+    <!--          VEHICLE INFORMATION SCREEN      -->
+    <!-- ======================================== -->
+
+    <section id="vehicleScreen" class="vehicle-screen" hidden>
+      <div class="settings-screen-panel">
+        <h2>VEHICLE INFORMATION</h2>
+
+        <!-- ============ CURRENT VEHICLE ============ -->
+
+        <h3>CURRENT VEHICLE</h3>
+
+        <div id="currentVehicleDisplay">
+          No vehicle selected.
+        </div>
+
+        <!-- ============ SAVED VEHICLES ============ -->
+
+        <h3>SAVED VEHICLES</h3>
+
+        <div id="savedVehiclesList">
+          No saved vehicles yet.
+        </div>
+
+        <!-- ============ ADD / EDIT VEHICLE ============ -->
+
+        <h3>ADD / EDIT VEHICLE</h3>
+
+        <form id="vehicleForm">
+          <label>
+            Vehicle Nickname (Optional)
+            <input id="vehicleNickname" autocomplete="off">
+          </label>
+
+          <label>
+            Truck Number
+            <input
+              id="vehicleTruckNumber"
+              required
+              autocomplete="off"
+            >
+          </label>
+
+          <label>
+            License Plate
+            <input
+              id="vehiclePlate"
+              required
+              autocomplete="off"
+            >
+          </label>
+
+          <div class="dialog-actions">
+            <button
+              type="button"
+              class="cancel"
+              id="cancelVehicleEdit"
+            >
+              CLEAR
+            </button>
+
+            <button type="submit" class="start">
+              SAVE VEHICLE
+            </button>
+          </div>
+        </form>
+
+        <!-- ============ BACK TO SETTINGS ============ -->
+
+        <button
+          type="button"
+          id="backVehicleSettingsBtn"
+          class="settings-option"
+        >
+          BACK TO SETTINGS
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ======================================== -->
+  <!--             START ROUTE DIALOG            -->
+  <!-- ======================================== -->
+
+  <dialog id="startDialog">
+    <form id="startForm">
+      <h2>Start Route</h2>
 
       <label>
         Truck Number
-        <input id="vehicleTruckNumber" required autocomplete="off">
+        <input id="truckNumber" required autocomplete="off">
       </label>
 
       <label>
         License Plate
-        <input id="vehiclePlate" required autocomplete="off">
-      </label>
-
-      <div class="dialog-actions">
-        <button type="button" class="cancel" id="cancelVehicleEdit">
-          CLEAR
-        </button>
-        <button type="submit" class="start">
-          SAVE VEHICLE
-        </button>
-      </div>
-    </form>
-
-    <button type="button"
-            id="backVehicleSettingsBtn"
-            class="settings-option">
-      BACK TO SETTINGS
-    </button>
-  </div>
-</section>
-
-<!-- ======================================== -->
-<!--          EDIT ROUTE HISTORY              -->
-<!-- ======================================== -->
-    <button type="button" id="editHistoryBtn" class="settings-option">
-      EDIT ROUTE HISTORY
-    </button>
-
-    <button type="button" id="backDashboardBtn" class="settings-option">
-      BACK TO DASHBOARD
-    </button>
-
-    <p class="settings-version">NightReapers v1.03</p>
-  </div>
-</section>
-    
-  </main>
-<!-- ============ START ROUTE ============ -->
-  <dialog id="startDialog">
-    <form id="startForm">
-      <h2>Start Route</h2>
-      <label>Truck Number
-        <input id="truckNumber" required autocomplete="off">
-      </label>
-      <label>License Plate
         <input id="plate" required autocomplete="off">
       </label>
+
       <label class="check">
         <input type="checkbox" id="rememberTruck">
         Remember truck and plate
       </label>
-      <label>Current Kilometres
-        <input id="startKm" type="number" min="0" step="1" required>
+
+      <label>
+        Current Kilometres
+        <input
+          id="startKm"
+          type="number"
+          min="0"
+          step="1"
+          required
+        >
       </label>
+
       <div class="dialog-actions">
-        <button type="button" class="cancel" data-close="startDialog">Cancel</button>
-        <button type="submit" class="start">START ROUTE</button>
-      </div>
-    </form>
-  </dialog>
-<!-- ============ END ROUTE ============ -->
-  <dialog id="endDialog">
-    <form id="endForm">
-      <h2>End Route</h2>
-      <label>Current Kilometres
-        <input id="endKm" type="number" min="0" step="1" required>
-      </label>
-      <label>Vehicle Notes (Optional)
-        <textarea id="routeNotes" rows="4"></textarea>
-      </label>
-      <div class="dialog-actions">
-        <button type="button" class="cancel" data-close="endDialog">Cancel</button>
-        <button type="submit" class="end">END ROUTE</button>
+        <button
+          type="button"
+          class="cancel"
+          data-close="startDialog"
+        >
+          Cancel
+        </button>
+
+        <button type="submit" class="start">
+          START ROUTE
+        </button>
       </div>
     </form>
   </dialog>
 
+  <!-- ======================================== -->
+  <!--              END ROUTE DIALOG             -->
+  <!-- ======================================== -->
+
+  <dialog id="endDialog">
+    <form id="endForm">
+      <h2>End Route</h2>
+
+      <label>
+        Current Kilometres
+        <input
+          id="endKm"
+          type="number"
+          min="0"
+          step="1"
+          required
+        >
+      </label>
+
+      <label>
+        Vehicle Notes (Optional)
+        <textarea id="routeNotes" rows="4"></textarea>
+      </label>
+
+      <div class="dialog-actions">
+        <button
+          type="button"
+          class="cancel"
+          data-close="endDialog"
+        >
+          Cancel
+        </button>
+
+        <button type="submit" class="end">
+          END ROUTE
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ======================================== -->
+  <!--          PAY INFORMATION DIALOG           -->
+  <!-- ======================================== -->
+
   <dialog id="settingsDialog">
     <form id="settingsForm">
       <h2>Settings</h2>
-      <label>Driving Hourly Rate (CAD)
-        <input id="hourlyRate" type="number" min="0" step="0.01" required>
+
+      <label>
+        Driving Hourly Rate (CAD)
+        <input
+          id="hourlyRate"
+          type="number"
+          min="0"
+          step="0.01"
+          required
+        >
       </label>
-      <label>Payroll Week Begins
+
+      <label>
+        Payroll Week Begins
         <select id="weekStart">
           <option value="0">Sunday</option>
           <option value="1">Monday</option>
@@ -244,30 +423,68 @@
           <option value="6">Saturday</option>
         </select>
       </label>
-      <p class="hint">Friday is provisional until you confirm your pay period.</p>
-      <button type="button" id="exportBtn" class="cancel">Export Backup</button>
+
+      <p class="hint">
+        Friday is provisional until you confirm your pay period.
+      </p>
+
+      <button
+        type="button"
+        id="exportBtn"
+        class="cancel"
+      >
+        Export Backup
+      </button>
+
       <div class="dialog-actions">
-        <button type="button" class="cancel" data-close="settingsDialog">Cancel</button>
-        <button type="submit" class="start">Save Settings</button>
+        <button
+          type="button"
+          class="cancel"
+          data-close="settingsDialog"
+        >
+          Cancel
+        </button>
+
+        <button type="submit" class="start">
+          Save Settings
+        </button>
       </div>
     </form>
   </dialog>
+
+  <!-- ======================================== -->
+  <!--              SHIFT REPORT                -->
+  <!-- ======================================== -->
 
   <dialog id="reportDialog">
     <div class="report" id="reportContent"></div>
     <p class="report-tap-hint">Tap to close</p>
   </dialog>
 
+  <!-- ======================================== -->
+  <!--                SLEEP MODE                 -->
+  <!-- ======================================== -->
 
   <div id="sleepScreen" hidden>
     <div class="sleep-content">
       <div id="sleepMascot" class="sleep-reaper">
-        <img class="frame-dark" src="assets/NRS-D.png" alt="Sleeping NightReaper">
-        <img class="frame-light" src="assets/NRS-L.png" alt="">
+        <img
+          class="frame-dark"
+          src="assets/NRS-D.png"
+          alt="Sleeping NightReaper"
+        >
+
+        <img
+          class="frame-light"
+          src="assets/NRS-L.png"
+          alt=""
+        >
       </div>
+
       <div class="sleep-status">ROUTE ACTIVE</div>
       <p>Tap to wake</p>
     </div>
   </div>
+
 </body>
 </html>
