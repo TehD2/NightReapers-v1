@@ -706,3 +706,10 @@ body::after {
   background: transparent !important;
   box-shadow: none !important;
 }
+  
+/* TEMPORARY BACKGROUND DIAGNOSTIC */
+.header,
+.actions,
+.route-actions {
+  background: rgba(255, 0, 255, 0.35) !important;
+}
