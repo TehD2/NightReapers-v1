@@ -1,0 +1,21 @@
+NightReapers cleanup — 2026-11-02
+
+Preserved:
+- Existing visual design, sleep artwork, route flow, history and reports.
+- Browser storage key nightreapers_v1 (existing route records remain compatible).
+- Latest-route-only deletion behavior and Ko-fi link.
+
+Changed:
+- Normalized header and sleep-screen HTML indentation.
+- Consolidated overlapping history/sleep CSS rules.
+- Removed unused .sleep-route-text and pulse animation rules.
+- No JavaScript logic changes.
+
+Important:
+- Route records are stored in your browser, not inside this ZIP.
+- Use Settings > Export Backup before switching browsers, clearing site data,
+  or replacing your working folder. Export creates JSON; the app does not
+  currently provide a JSON import function.
+- Replacing the project files at the same origin does not intentionally reset
+  localStorage. Opening from a different URL/origin may show empty records.
+- Check the dashboard, sleep animation and history after replacing files.
