@@ -15,14 +15,7 @@ body {
   min-height: 100vh;
   color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
-  background: radial-gradient(
-    ellipse at 50% 15%,
-    #a87ac4 0%,
-    #68417f 18%,
-    #291633 42%,
-    #0b0b0d 75%
-  );
-  background-attachment: fixed;
+  background: var(--bg);
 
 body::before, body::after {
   content: "";
@@ -183,7 +176,6 @@ button:disabled { opacity: .35; cursor: not-allowed; }
   position: sticky;
   bottom: 0;
   padding: 12px 0;
-  background: var(--bg);
 }
 
 .controls button, .dialog-actions button {
@@ -706,34 +698,4 @@ body::after {
   background: transparent !important;
   box-shadow: none !important;
 }
-
-/* NIGHTREAPERS — PURPLE EDGE GLOW */
-
-body {
-  background:
-    radial-gradient(
-      ellipse 32% 75% at 0% 45%,
-      rgba(161, 86, 205, 0.28),
-      transparent 100%
-    ),
-    radial-gradient(
-      ellipse 32% 75% at 100% 45%,
-      rgba(161, 86, 205, 0.28),
-      transparent 100%
-    ),
-    #0b0b0d;
-}
-
-/* Keep the hexagon wallpaper visible at the edges */
-body::before,
-body::after {
-  z-index: 0;
-  opacity: 0.35;
-  pointer-events: none;
-}
-
-/* Keep the app above the wallpaper */
-.app {
-  position: relative;
-  z-index: 1;
-}
+  
