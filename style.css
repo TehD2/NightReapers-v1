@@ -698,4 +698,10 @@ body::after {
   background: transparent !important;
   box-shadow: none !important;
 }
+
+/* TEST: Restore hexagon wallpaper layering */
+body::before,
+body::after {
+    z-index: -1 !important;
+}
   
