@@ -250,10 +250,25 @@ $("endForm").addEventListener("submit", event => {
   showReport(route);
 });
 
+
+/* ===== SETTINGS SCREEN NAVIGATION ===== */
+
 $("settingsBtn").addEventListener("click", () => {
-  $("hourlyRate").value = data.settings.rate;
-  $("weekStart").value = data.settings.weekStart;
-  $("settingsDialog").showModal();
+  $("settingsScreen").hidden = false;
+  document.querySelector(".earnings").hidden = true;
+  document.querySelector(".controls").hidden = true;
+  document.querySelector(".history").hidden = true;
+  $("activePanel").hidden = true;
+  $("settingsBtn").hidden = true;
+});
+
+$("backDashboardBtn").addEventListener("click", () => {
+  $("settingsScreen").hidden = true;
+  document.querySelector(".earnings").hidden = false;
+  document.querySelector(".controls").hidden = false;
+  document.querySelector(".history").hidden = false;
+  $("settingsBtn").hidden = false;
+  render();
 });
 
 $("settingsForm").addEventListener("submit", event => {
