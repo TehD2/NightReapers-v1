@@ -48,7 +48,6 @@
           class="kofi-link"
         >☕ Support the Reaper</a>
       </div>
-      <button class="settings-btn" id="settingsBtn" aria-label="Settings">⚙</button>
     </header>
 
     <section class="panel earnings">
@@ -71,13 +70,23 @@
         </div>
       </div>
     </section>
+    
+    <div class="controls">
+      <button class="start" id="startBtn">START ROUTE</button>
+      <button class="end" id="endBtn" disabled>END ROUTE</button>
+    </div>
 
+    <button class="settings-main-btn" id="settingsBtn" type="button">
+      SETTINGS
+    </button>
+    
     <section class="panel active-panel" id="activePanel" hidden>
       <div class="section-title">ROUTE ACTIVE</div>
       <div class="timer" id="routeTimer">00:00:00</div>
       <p id="activeTruck"></p>
       <p>Current estimated gross: <strong id="livePay">$0.00</strong></p>
 
+      
     <!-- ===== ROUTE MODE CONTROLS ===== -->
     <div id="routeModeControls" class="route-mode-controls" hidden>
       <button class="sleep-btn" id="sleepBtn" type="button">☾ Sleep Mode</button>
@@ -95,11 +104,6 @@
         <p class="empty">No completed routes yet.</p>
       </div>
     </section>
-
-    <div class="controls">
-      <button class="start" id="startBtn">START ROUTE</button>
-      <button class="end" id="endBtn" disabled>END ROUTE</button>
-    </div>
 
   </main>
 
