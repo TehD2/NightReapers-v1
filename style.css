@@ -1,3 +1,7 @@
+/* ======================================== */
+/*         DESIGN TOKENS & GLOBALS          */
+/* ======================================== */
+
 :root {
   --bg: #0b0b0d;
   --panel: #202226;
@@ -10,6 +14,8 @@
 
 * { box-sizing: border-box; }
 
+/* ============ BODY BACKGROUND ============ */
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -17,17 +23,20 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   background:
     linear-gradient(
-        90deg,
-        #7900c9 0%,
-        #340055 5%,
-        #100018 11%,
-        #0b0b0d 20%,
-        #0b0b0d 80%,
-        #100018 89%,
-        #340055 95%,
-        #7900c9 100%
+      90deg,
+      #7900c9 0%,
+      #340055 5%,
+      #100018 11%,
+      #0b0b0d 20%,
+      #0b0b0d 80%,
+      #100018 89%,
+      #340055 95%,
+      #7900c9 100%
     );
-background-attachment: fixed;
+  background-attachment: fixed;
+}
+
+/* ============ HEXAGON WALLPAPER ============ */
 
 body::before, body::after {
   content: "";
@@ -35,7 +44,8 @@ body::before, body::after {
   top: 0;
   bottom: 0;
   width: 32px;
-  z-index: 0;
+  z-index: -1;
+  pointer-events: none;
   opacity: .25;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='42' viewBox='0 0 36 42'%3E%3Cpath d='M18 1L35 11V31L18 41L1 31V11Z' fill='none' stroke='%239b6cc3' stroke-width='1.5'/%3E%3C/svg%3E");
   background-size: 36px 42px;
@@ -49,6 +59,10 @@ button { cursor: pointer; }
 button:disabled { opacity: .35; cursor: not-allowed; }
 [hidden] { display: none !important; }
 
+/* ======================================== */
+/*            APP SHELL & HEADER            */
+/* ======================================== */
+
 .app {
   width: min(100%, 560px);
   margin: auto;
@@ -58,6 +72,8 @@ button:disabled { opacity: .35; cursor: not-allowed; }
   flex-direction: column;
   gap: 20px;
 }
+
+/* ============ APP HEADER ============ */
 
 .header {
   display: flex;
@@ -84,6 +100,8 @@ button:disabled { opacity: .35; cursor: not-allowed; }
   font-size: 12px;
 }
 
+/* ============ DASHBOARD SETTINGS BUTTON ============ */
+
 .settings-main-btn {
   display: block;
   width: 100%;
@@ -103,6 +121,10 @@ button:disabled { opacity: .35; cursor: not-allowed; }
   box-shadow: 0 0 12px #a16ac944;
 }
 
+/* ======================================== */
+/*             DASHBOARD PANELS             */
+/* ======================================== */
+
 .panel {
   background: linear-gradient(145deg, #26282c, #151619);
   border: 1px solid #55565b;
@@ -110,6 +132,8 @@ button:disabled { opacity: .35; cursor: not-allowed; }
   padding: 22px 16px;
   box-shadow: 0 8px 24px #0008;
 }
+
+/* ============ WEEKLY EARNINGS ============ */
 
 .earnings { text-align: center; }
 .earnings h2 { margin: 0; font-size: 20px; }
@@ -129,6 +153,8 @@ button:disabled { opacity: .35; cursor: not-allowed; }
   color: var(--text);
   font-size: 12px;
 }
+
+/* ============ WEEKLY STATISTICS ============ */
 
 .stats {
   display: grid;
@@ -151,6 +177,8 @@ button:disabled { opacity: .35; cursor: not-allowed; }
   font-size: clamp(14px, 4vw, 20px);
 }
 
+/* ============ ACTIVE ROUTE ============ */
+
 .section-title { color: var(--purple); letter-spacing: 3px; }
 .active-panel { text-align: center; }
 .timer { font-size: 44px; font-weight: bold; margin: 15px; }
@@ -161,6 +189,8 @@ button:disabled { opacity: .35; cursor: not-allowed; }
   border-radius: 12px;
   padding: 12px 20px;
 }
+
+/* ============ ROUTE HISTORY ============ */
 
 .history { flex: 1; }
 .history-heading {
@@ -191,6 +221,10 @@ button:disabled { opacity: .35; cursor: not-allowed; }
 .history-item small { color: var(--muted); display: block; margin-top: 5px; }
 .history-item .right { text-align: right; white-space: nowrap; }
 
+/* ======================================== */
+/*         ROUTE CONTROLS & DIALOGS         */
+/* ======================================== */
+
 .controls {
   display: flex;
   gap: 12px;
@@ -212,6 +246,8 @@ button:disabled { opacity: .35; cursor: not-allowed; }
 .start { background: linear-gradient(#20a34b, #08652c); }
 .end { background: linear-gradient(#d52b36, #851019); }
 .cancel { background: #383a40; }
+
+/* ============ DIALOGS & FORMS ============ */
 
 dialog {
   width: min(92vw, 440px);
@@ -242,11 +278,17 @@ dialog .check { display: flex; align-items: center; gap: 10px; }
 .hint { font-size: 12px; color: var(--muted); }
 #exportBtn { padding: 12px; color: white; border-radius: 9px; border: 0; }
 
+/* ============ SHIFT REPORT ============ */
+
 .report { line-height: 1.8; }
 .report h2 { text-align: center; }
 .report hr { border: 0; border-top: 1px solid #555; }
 .report .report-row { display: flex; justify-content: space-between; gap: 20px; }
 .report .notes { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* ======================================== */
+/*                SLEEP MODE                */
+/* ======================================== */
 
 #sleepScreen {
   position: fixed;
@@ -288,6 +330,8 @@ dialog .check { display: flex; align-items: center; gap: 10px; }
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.025); }
 }
+/* ============ PRINT STYLES ============ */
+
 @media print {
   body { background: white; color: black; }
   .app, .no-print { display: none !important; }
@@ -301,9 +345,7 @@ dialog .check { display: flex; align-items: center; gap: 10px; }
     background: white;
   }
 }
-
-
-/* Route history controls */
+/* ============ HISTORY ITEM ACTIONS ============ */
 
 .history-report {
   flex: 1;
@@ -336,9 +378,7 @@ dialog .check { display: flex; align-items: center; gap: 10px; }
   background: #85252e;
   color: white;
 }
-
-
-/* NIGHTREAPERS — SLEEP MODE */
+/* ============ SLEEP MODE ANIMATIONS ============ */
 
 .sleep-reaper img {
   position: absolute;
@@ -373,6 +413,8 @@ dialog .check { display: flex; align-items: center; gap: 10px; }
 }
 
 
+/* ============ KO-FI LINK ============ */
+
 .kofi-link {
   display: block;
   width: fit-content;
@@ -388,9 +430,9 @@ dialog .check { display: flex; align-items: center; gap: 10px; }
   color: #e4baff;
   text-shadow: 0 0 10px #a46ac8;
 }
-
-
-/* ===== NIGHTREAPERS STARTUP SCREEN ===== */
+/* ======================================== */
+/*          STARTUP & WAITING MODE          */
+/* ======================================== */
 
 .startup-screen {
   position: fixed;
@@ -458,8 +500,7 @@ dialog .check { display: flex; align-items: center; gap: 10px; }
   letter-spacing: 5px;
   margin-top: 8px;
 }
-
-/* ===== STARTUP TWINKLING STARS ===== */
+/* ============ TWINKLING STARS ============ */
 
 .startup-stars {
   position: absolute;
@@ -487,11 +528,7 @@ dialog .check { display: flex; align-items: center; gap: 10px; }
     opacity: 1;
   }
 }
-
-/* ===== STARTUP MOVING CLOUDS ===== */
-
-
-/* ===== STARTUP MOVING CLOUDS ===== */
+/* ============ MOVING CLOUDS ============ */
 
 .startup-clouds {
   position: absolute;
@@ -542,12 +579,11 @@ dialog .check { display: flex; align-items: center; gap: 10px; }
     translate: calc(100vw + 600px) 0;
   }
 }
-
-/* ===== STARTUP CINEMATIC TRANSITION ===== */
-
 .startup-screen {
   transition: opacity 1s ease-in-out;
 }
+
+/* ============ STARTUP TRANSITIONS ============ */
 
 .startup-screen.fade-out {
   opacity: 0;
@@ -567,8 +603,7 @@ dialog .check { display: flex; align-items: center; gap: 10px; }
 .startup-blackout.visible {
   opacity: 1;
 }
-
-/* ===== ROUTE MODE BUTTON LAYOUT ===== */
+/* ============ ROUTE MODE BUTTONS ============ */
 
 .route-mode-controls:not([hidden]) {
   display: flex;
@@ -577,8 +612,7 @@ dialog .check { display: flex; align-items: center; gap: 10px; }
   gap: 12px;
   margin-top: 12px;
 }
-
-/* ===== SLEEP MODE FADE TRANSITION ===== */
+/* ============ SLEEP FADE ============ */
 
 #sleepScreen:not([hidden]) {
   opacity: 0;
@@ -592,8 +626,7 @@ dialog .check { display: flex; align-items: center; gap: 10px; }
 #sleepScreen[hidden] {
   display: none;
 }
-
-/* ===== SKELEY'S GROUND ===== */
+/* ============ SKELEY GROUND ============ */
 
 .startup-screen::before {
   content: "";
@@ -613,12 +646,9 @@ dialog .check { display: flex; align-items: center; gap: 10px; }
   pointer-events: none;
 }
 
-.startup-character {
-  z-index: 2;
-}
-
-
-/* ===== SHIFT REPORT SLIDING CONFIRMATION ===== */
+/* ======================================== */
+/*        REPORT CLOSE CONFIRMATION         */
+/* ======================================== */
 
 .report-confirm {
   position: fixed;
@@ -694,40 +724,26 @@ dialog .check { display: flex; align-items: center; gap: 10px; }
 #confirmCloseNo {
   background: #70419b;
 }
-
-/* ===== SHIFT REPORT TAP HINT ===== */
+/* ============ REPORT TAP HINT ============ */
 
 .report-tap-hint {
   text-align: center;
-}
-
-/* Keep hexagon wallpaper visible behind the app */
-body::before,
-body::after {
-  z-index: 0;
-  pointer-events: none;
 }
 
 .app {
   position: relative;
   z-index: 1;
 }
+/* ============ TRANSPARENT DASHBOARD ELEMENTS ============ */
 
-/* Remove unwanted black rectangles */
 .header,
 .controls {
   background: transparent !important;
   box-shadow: none !important;
 }
-
-/* TEST: Restore hexagon wallpaper layering */
-body::before,
-body::after {
-    z-index: -1 !important;
-}
-  
-
-/* ===== NIGHTREAPERS SETTINGS SCREEN ===== */
+/* ======================================== */
+/*             SETTINGS SCREEN              */
+/* ======================================== */
 
 .settings-screen[hidden] {
   display: none !important;
@@ -754,6 +770,8 @@ body::after {
   font-size: 30px;
   margin: 0 0 28px;
 }
+
+/* ============ SETTINGS MENU BUTTONS ============ */
 
 .settings-option {
   display: block;
@@ -785,10 +803,10 @@ body::after {
   font-weight: 700;
   margin: 0;
 }
+/* ======================================== */
+/*           VEHICLE INFORMATION            */
+/* ======================================== */
 
-/* ======================================== */
-/*          VEHICLE INFORMATION             */
-/* ======================================== */
 .vehicle-screen[hidden] {
   display: none !important;
 }
@@ -803,12 +821,16 @@ body::after {
   min-height: 600px;
 }
 
+/* ============ VEHICLE HEADINGS ============ */
+
 .vehicle-screen h3 {
   color: var(--purple);
   font-size: 15px;
   letter-spacing: 2px;
   margin: 24px 0 12px;
 }
+
+/* ============ CURRENT & SAVED VEHICLES ============ */
 
 #currentVehicleDisplay,
 #savedVehiclesList {
@@ -818,6 +840,8 @@ body::after {
   border-radius: 12px;
   color: var(--text);
 }
+
+/* ============ VEHICLE FORM ============ */
 
 #vehicleForm label {
   display: block;
