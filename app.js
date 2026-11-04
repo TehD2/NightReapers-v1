@@ -453,6 +453,80 @@ $("routeInfoBtn").addEventListener("click", () => {
 
 $("backRouteSettingsBtn").addEventListener("click", showSettings);
 
+// ========================================
+//         EDIT MOST RECENT SHIFT
+// ========================================
+
+// Match the dashboard's definition of the most recent completed shift.
+function mostRecentCompletedShift() {
+  return [...data.routes].sort((a, b) => b.start - a.start)[0] || null;
+}
+
+// datetime-local uses the device's local timezone, not UTC.
+function toLocalDateTimeInput(timestamp) {
+  const date = new Date(timestamp);
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
+}
+
+$("editHistoryBtn").addEventListener("click", () => {
+  const route = mostRecentCompletedShift();
+  const fields = $("editHistoryFields");
+  const submit = $("saveEditHistoryBtn");
+  fields.hidden = !route;
+  submit.hidden = !route;
+
+  if (!route) {
+    $("editHistoryShiftLabel").textContent = "No completed shifts to edit.";
+  } else {
+    $("editHistoryShiftLabel").textContent =
+      `Most recent: ${dateText(route.start)} • Route ${route.routeNumber || "0000"}`;
+    $("editHistoryRouteNumber").value = route.routeNumber || "0000";
+    $("editHistoryTruck").value = route.truck || "";
+    $("editHistoryPlate").value = route.plate || "";
+    $("editHistoryStartKm").value = route.startKm;
+    $("editHistoryEndKm").value = route.endKm;
+    $("editHistoryStart").value = toLocalDateTimeInput(route.start);
+    $("editHistoryEnd").value = toLocalDateTimeInput(route.end);
+    $("editHistoryNotes").value = route.notes || "";
+  }
+  $("editHistoryDialog").showModal();
+});
+
+$("editHistoryForm").addEventListener("submit", event => {
+  event.preventDefault();
+  const route = mostRecentCompletedShift();
+  if (!route) return;
+
+  const routeNumber = $("editHistoryRouteNumber").value.trim();
+  const truck = $("editHistoryTruck").value.trim();
+  const plate = $("editHistoryPlate").value.trim();
+  const startKmText = $("editHistoryStartKm").value;
+  const endKmText = $("editHistoryEndKm").value;
+  const startKm = Number(startKmText);
+  const endKm = Number(endKmText);
+  const start = new Date($("editHistoryStart").value).getTime();
+  const end = new Date($("editHistoryEnd").value).getTime();
+
+  if (!routeNumber || !truck || !plate || !startKmText || !endKmText ||
+      !Number.isFinite(startKm) || !Number.isFinite(endKm) ||
+      startKm < 0 || endKm < startKm ||
+      !Number.isFinite(start) || !Number.isFinite(end) || end < start) {
+    alert("Check the fields: ending kilometres and time must not be earlier than starting values.");
+    return;
+  }
+
+  // Update the same completed record; leave vehicle/route presets and active shift alone.
+  Object.assign(route, {
+    routeNumber, truck, plate, startKm, endKm, start, end,
+    notes: $("editHistoryNotes").value.trim(),
+    gross: (end - start) / 3600000 * (Number(route.rate) || 0)
+  });
+  save();
+  $("editHistoryDialog").close();
+  render();
+});
+
 // ============ PAY INFORMATION ============
 
 $("settingsForm").addEventListener("submit", event => {
