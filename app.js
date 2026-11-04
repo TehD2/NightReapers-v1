@@ -273,11 +273,9 @@ function getStartVehicle() {
   );
   if (assigned) return assigned;
 
-  // For existing routes, automatically match the route and truck numbers.
-  // Do not silently show a different truck if no match exists.
-  return data.vehicles.find(
-    vehicle => String(vehicle.truck).trim() === String(route.number).trim()
-  ) || null;
+  // Saved routes require an explicit vehicle assignment.
+  // A route number identifies the route, not the physical truck.
+  return null;
 }
 
 function updateStartVehicleDisplay() {
@@ -299,7 +297,7 @@ function updateStartVehicleDisplay() {
 
   $("startVehicleHint").hidden = !!vehicle;
   $("startVehicleHint").textContent = $("startRouteSelect").value
-    ? "No matching truck found. Add a vehicle with this route's truck number in Settings → Vehicle Information."
+    ? "No vehicle assigned to this route. Open Settings → Route Information and assign a saved vehicle."
     : "Select a vehicle in Settings → Vehicle Information before starting a route.";
   $("confirmStartRouteBtn").disabled = !vehicle;
 }
@@ -447,6 +445,7 @@ $("vehicleInfoBtn").addEventListener("click", () => {
 $("routeInfoBtn").addEventListener("click", () => {
   $("settingsScreen").hidden = true;
   $("routeScreen").hidden = false;
+  populateRouteVehicleSelect();
   renderRoutes();
 });
 
@@ -695,6 +694,16 @@ function renderRoutes() {
       `Route ${route.number}${route.nickname ? ` — ${route.nickname}` : ""}`;
     label.style.marginBottom = "8px";
 
+    const assignedVehicle = data.vehicles.find(
+      vehicle => vehicle.id === data.routeVehicleIds[route.id]
+    );
+    const assignment = document.createElement("small");
+    assignment.className = "route-assignment-summary";
+    assignment.textContent = assignedVehicle
+      ? `Assigned: ${assignedVehicle.nickname || `Truck ${assignedVehicle.truck}`} • ${assignedVehicle.truck} • ${assignedVehicle.plate}`
+      : "Assigned: No vehicle";
+    label.appendChild(assignment);
+
     const actions = document.createElement("div");
     actions.className = "dialog-actions";
 
@@ -724,6 +733,7 @@ function renderRoutes() {
       editingRouteId = route.id;
       $("routeNumber").value = route.number;
       $("routeNickname").value = route.nickname || "";
+      populateRouteVehicleSelect(data.routeVehicleIds[route.id] || "");
 
       $("routeForm")
         .querySelector('button[type="submit"]')
@@ -763,9 +773,23 @@ function renderRoutes() {
 
 // ============ ROUTE FORM ============
 
+function populateRouteVehicleSelect(selectedId = "") {
+  const select = $("routeAssignedVehicle");
+  select.replaceChildren();
+  select.add(new Option("No vehicle assigned", ""));
+
+  for (const vehicle of data.vehicles) {
+    const name = vehicle.nickname || `Truck ${vehicle.truck}`;
+    select.add(new Option(`${name} — ${vehicle.truck} • ${vehicle.plate}`, vehicle.id));
+  }
+  select.value = selectedId;
+  if (select.selectedIndex === -1) select.value = "";
+}
+
 function clearRouteForm() {
   editingRouteId = null;
   $("routeForm").reset();
+  populateRouteVehicleSelect();
   $("routeForm")
     .querySelector('button[type="submit"]')
     .textContent = "SAVE ROUTE";
@@ -778,6 +802,7 @@ $("routeForm").addEventListener("submit", event => {
 
   const number = $("routeNumber").value.trim();
   const nickname = $("routeNickname").value.trim();
+  const vehicleId = $("routeAssignedVehicle").value;
 
   if (!number) return;
 
@@ -787,8 +812,9 @@ $("routeForm").addEventListener("submit", event => {
     );
 
     if (existing) {
-      if (existing.number !== number) delete data.routeVehicleIds[existing.id];
       Object.assign(existing, { number, nickname });
+      if (vehicleId) data.routeVehicleIds[existing.id] = vehicleId;
+      else delete data.routeVehicleIds[existing.id];
     }
   } else {
     const id = typeof crypto.randomUUID === "function"
@@ -796,6 +822,7 @@ $("routeForm").addEventListener("submit", event => {
       : `${Date.now()}-${Math.random()}`;
 
     data.savedRoutes.push({ id, number, nickname });
+    if (vehicleId) data.routeVehicleIds[id] = vehicleId;
 
     if (!data.selectedRouteId) {
       data.selectedRouteId = id;
