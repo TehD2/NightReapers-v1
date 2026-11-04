@@ -1058,3 +1058,25 @@ dialog .check { display: flex; align-items: center; gap: 10px; }
   font-size: 12px;
   line-height: 1.5;
 }
+
+/* ============ ROUTE VEHICLE ASSIGNMENT ============ */
+
+#routeForm select {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px;
+  background: #111215;
+  border: 1px solid #555;
+  border-radius: 9px;
+  color: var(--text);
+}
+
+#routeForm select:focus { outline: 1px solid var(--purple); }
+
+.route-assignment-summary {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
