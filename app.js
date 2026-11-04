@@ -175,7 +175,7 @@ function renderHistory(showAll = false) {
     title.textContent = dateText(route.start);
 
     const details = document.createElement("small");
-    details.textContent = `Truck ${route.truck} • ${route.plate}`;
+    details.textContent = `Route ${route.routeNumber || "0000"} • Truck ${route.truck} • ${route.plate}`;
 
     const elapsed = document.createElement("strong");
     elapsed.textContent = duration(route.end - route.start);
