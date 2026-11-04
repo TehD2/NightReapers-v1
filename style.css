@@ -871,3 +871,69 @@ dialog .check { display: flex; align-items: center; gap: 10px; }
 .vehicle-screen .settings-option {
   margin-top: 24px;
 }
+
+/* ======================================== */
+/*           ROUTE INFORMATION              */
+/* ======================================== */
+
+/* ============ ROUTE SCREEN ============ */
+
+#routeScreen {
+  width: 100%;
+  max-width: 508px;
+  margin: 0 auto;
+}
+
+/* ============ SECTION HEADINGS ============ */
+
+#routeScreen h3 {
+  color: var(--purple);
+  font-size: 15px;
+  letter-spacing: 2px;
+  margin: 24px 0 12px;
+}
+
+/* ============ CURRENT / SAVED ROUTES ============ */
+
+#currentRouteDisplay,
+#savedRoutesList {
+  padding: 16px;
+  background: #151619;
+  border: 1px solid #55565b;
+  border-radius: 12px;
+  color: var(--text);
+}
+
+/* ============ ROUTE FORM ============ */
+
+#routeForm label {
+  display: block;
+  margin: 16px 0;
+  font-size: 14px;
+}
+
+#routeForm input {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px;
+  background: #111215;
+  border: 1px solid #555;
+  border-radius: 9px;
+  color: var(--text);
+}
+
+#routeForm input:focus {
+  outline: 1px solid var(--purple);
+}
+
+/* ============ FORM BUTTONS ============ */
+
+#routeForm .dialog-actions button {
+  min-width: 0;
+}
+
+#routeScreen .settings-option {
+  margin-top: 24px;
+}
+
