@@ -381,7 +381,14 @@
 
   <dialog id="startDialog">
     <form id="startForm">
-      <h2>Start Route</h2>
+      <!-- ============ ROUTE SELECTION ============ -->
+      <div class="start-route-header">
+        <h2>Start Route</h2>
+
+        <select id="startRouteSelect" aria-label="Select Route">
+          <option value="">Route 0000</option>
+        </select>
+      </div>
 
       <label>
         Truck Number
