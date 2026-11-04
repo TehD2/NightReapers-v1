@@ -320,10 +320,18 @@ $("payInfoBtn").addEventListener("click", () => {
   $("settingsDialog").showModal();
 });
 
+/* ============ VEHICLE INFORMATION ============ */
 $("vehicleInfoBtn").addEventListener("click", () => {
   $("settingsScreen").hidden = true;
   $("vehicleScreen").hidden = false;
   renderVehicles();
+});
+
+/* ============ ROUTE INFORMATION ============ */
+
+$("routeInfoBtn").addEventListener("click", () => {
+  $("settingsScreen").hidden = true;
+  $("routeScreen").hidden = false;
 });
 
 // ============ PAY INFORMATION ============
