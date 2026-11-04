@@ -352,7 +352,9 @@ $("vehicleInfoBtn").addEventListener("click", () => {
 $("routeInfoBtn").addEventListener("click", () => {
   $("settingsScreen").hidden = true;
   $("routeScreen").hidden = false;
+  renderRoutes();
 });
+
 
 $("backRouteSettingsBtn").addEventListener("click", showSettings);
 
@@ -459,6 +461,125 @@ $("vehicleForm").addEventListener("submit", event => {
   save();
   clearVehicleForm();
   renderVehicles();
+});
+
+// ========================================
+//              ROUTE GARAGE
+// ========================================
+
+// ============ ROUTE DISPLAY ============
+
+function renderRoutes() {
+  const selected = data.savedRoutes.find(
+    route => route.id === data.selectedRouteId
+  );
+
+  $("currentRouteDisplay").textContent = selected
+    ? `Route ${selected.number}${selected.nickname ? ` — ${selected.nickname}` : ""}`
+    : "No route selected.";
+
+  const list = $("savedRoutesList");
+  list.replaceChildren();
+
+  if (!data.savedRoutes.length) {
+    list.textContent = "No saved routes yet.";
+    return;
+  }
+
+  for (const route of data.savedRoutes) {
+    const item = document.createElement("div");
+    item.className = "saved-route-item";
+    item.style.marginBottom = "12px";
+
+    const label = document.createElement("div");
+    label.textContent =
+      `Route ${route.number}${route.nickname ? ` — ${route.nickname}` : ""}`;
+    label.style.marginBottom = "8px";
+
+    const actions = document.createElement("div");
+    actions.className = "dialog-actions";
+
+    // ===== SELECT ROUTE =====
+
+    const selectBtn = document.createElement("button");
+    selectBtn.type = "button";
+    selectBtn.className = "start";
+    selectBtn.textContent =
+      route.id === data.selectedRouteId ? "SELECTED" : "SELECT";
+    selectBtn.disabled = route.id === data.selectedRouteId;
+
+    selectBtn.addEventListener("click", () => {
+      data.selectedRouteId = route.id;
+      save();
+      renderRoutes();
+    });
+
+    // ===== EDIT ROUTE =====
+
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = "cancel";
+    editBtn.textContent = "EDIT";
+
+    editBtn.addEventListener("click", () => {
+      editingRouteId = route.id;
+      $("routeNumber").value = route.number;
+      $("routeNickname").value = route.nickname || "";
+
+      $("routeForm")
+        .querySelector('button[type="submit"]')
+        .textContent = "SAVE CHANGES";
+    });
+
+    actions.append(selectBtn, editBtn);
+    item.append(label, actions);
+    list.appendChild(item);
+  }
+}
+
+// ============ ROUTE FORM ============
+
+function clearRouteForm() {
+  editingRouteId = null;
+  $("routeForm").reset();
+  $("routeForm")
+    .querySelector('button[type="submit"]')
+    .textContent = "SAVE ROUTE";
+}
+
+$("cancelRouteEdit").addEventListener("click", clearRouteForm);
+
+$("routeForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const number = $("routeNumber").value.trim();
+  const nickname = $("routeNickname").value.trim();
+
+  if (!number) return;
+
+  if (editingRouteId) {
+    const existing = data.savedRoutes.find(
+      route => route.id === editingRouteId
+    );
+
+    if (existing) {
+      Object.assign(existing, { number, nickname });
+    }
+  } else {
+    const id = typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random()}`;
+
+    data.savedRoutes.push({ id, number, nickname });
+
+    if (!data.selectedRouteId) {
+      data.selectedRouteId = id;
+    }
+  }
+
+  save();
+  clearRouteForm();
+  renderRoutes();
 });
 
 // ============ DIALOG CONTROLS ============
