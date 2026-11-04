@@ -970,3 +970,33 @@ dialog .check { display: flex; align-items: center; gap: 10px; }
   border: 1px solid #c44a5e;
   color: white;
 }
+
+/* ======================================== */
+/*           START ROUTE HEADER             */
+/* ======================================== */
+
+.start-route-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.start-route-header h2 {
+  margin: 0;
+}
+
+#startRouteSelect {
+  width: auto;
+  min-width: 125px;
+  max-width: 55%;
+  padding: 9px 10px;
+  border: 1px solid #666;
+  border-radius: 10px;
+  background: #151619;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
