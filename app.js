@@ -334,6 +334,11 @@ $("routeInfoBtn").addEventListener("click", () => {
   $("routeScreen").hidden = false;
 });
 
+$("backRouteSettingsBtn").addEventListener("click", () => {
+  $("routeScreen").hidden = true;
+  $("settingsScreen").hidden = false;
+});
+
 // ============ PAY INFORMATION ============
 
 $("settingsForm").addEventListener("submit", event => {
