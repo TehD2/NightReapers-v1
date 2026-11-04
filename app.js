@@ -45,7 +45,7 @@ if (data.selectedRouteId === undefined) {
 
 let editingRouteId = null;
 
-// Remember the last vehicle used for each saved route.
+// Store a vehicle assignment for each saved route.
 // Existing completed reports remain independent of these assignments.
 if (!data.routeVehicleIds || typeof data.routeVehicleIds !== "object" ||
     Array.isArray(data.routeVehicleIds)) {
@@ -242,6 +242,7 @@ function populateStartRouteSelect() {
   select.add(new Option("Route 0000 — No Route Selected", ""));
 
   for (const route of data.savedRoutes) {
+    if (String(route.number).trim() === "0000") continue;
     const label = route.nickname
       ? `Route ${route.number} — ${route.nickname}`
       : `Route ${route.number}`;
@@ -256,13 +257,26 @@ function populateStartRouteSelect() {
 
 function getStartVehicle() {
   const routeId = $("startRouteSelect").value;
-  const assignedId = routeId ? data.routeVehicleIds[routeId] : null;
-  const assigned = data.vehicles.find(vehicle => vehicle.id === assignedId);
-
-  // For routes without a previous assignment, use the vehicle selected
-  // in Vehicle Information. Route 0000 uses that selection as well.
-  return assigned || data.vehicles.find(
+  const selectedVehicle = data.vehicles.find(
     vehicle => vehicle.id === data.selectedVehicleId
+  ) || null;
+
+  // Route 0000 always uses the vehicle selected in Vehicle Information.
+  if (!routeId) return selectedVehicle;
+
+  const route = data.savedRoutes.find(savedRoute => savedRoute.id === routeId);
+  if (!route) return null;
+
+  // Respect a previously saved assignment when the vehicle still exists.
+  const assigned = data.vehicles.find(
+    vehicle => vehicle.id === data.routeVehicleIds[routeId]
+  );
+  if (assigned) return assigned;
+
+  // For existing routes, automatically match the route and truck numbers.
+  // Do not silently show a different truck if no match exists.
+  return data.vehicles.find(
+    vehicle => String(vehicle.truck).trim() === String(route.number).trim()
   ) || null;
 }
 
@@ -284,6 +298,9 @@ function updateStartVehicleDisplay() {
   }
 
   $("startVehicleHint").hidden = !!vehicle;
+  $("startVehicleHint").textContent = $("startRouteSelect").value
+    ? "No matching truck found. Add a vehicle with this route's truck number in Settings → Vehicle Information."
+    : "Select a vehicle in Settings → Vehicle Information before starting a route.";
   $("confirmStartRouteBtn").disabled = !vehicle;
 }
 
@@ -357,16 +374,16 @@ $("endForm").addEventListener("submit", event => {
     return;
   }
   
-    const end = Date.now();
+  const end = Date.now();
 
-    const route = {
-      ...data.active,
-      end,
-      endKm,
-      routeNumber: data.active.routeNumber || "0000",
-      notes: $("routeNotes").value.trim(),
-      gross: (end - data.active.start) / 3600000 * data.active.rate
-    };
+  const route = {
+    ...data.active,
+    end,
+    endKm,
+    routeNumber: data.active.routeNumber || "0000",
+    notes: $("routeNotes").value.trim(),
+    gross: (end - data.active.start) / 3600000 * data.active.rate
+  };
 
 
   data.routes.push(route);
@@ -696,6 +713,7 @@ $("routeForm").addEventListener("submit", event => {
     );
 
     if (existing) {
+      if (existing.number !== number) delete data.routeVehicleIds[existing.id];
       Object.assign(existing, { number, nickname });
     }
   } else {
@@ -748,8 +766,6 @@ function showReport(route) {
   
   const title = document.createElement("h2");
   const routeNumber = route.routeNumber || "0000";
-
-
   title.textContent = `ROUTE ${routeNumber} — SHIFT REPORT`;
   content.appendChild(title);
 
