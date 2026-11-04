@@ -31,6 +31,20 @@ if (!data.settings || typeof data.settings !== "object") {
 
 let editingVehicleId = null;
 
+/* ============ SAVED ROUTE STORAGE ============ */
+
+// Keep existing shift history separate from saved route presets.
+if (!Array.isArray(data.savedRoutes)) {
+  data.savedRoutes = [];
+}
+
+// No saved route is selected until the user chooses one.
+if (data.selectedRouteId === undefined) {
+  data.selectedRouteId = null;
+}
+
+let editingRouteId = null;
+
 function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
