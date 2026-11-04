@@ -937,3 +937,36 @@ dialog .check { display: flex; align-items: center; gap: 10px; }
   margin-top: 24px;
 }
 
+/* ======================================== */
+/*         GARAGE ACTION BUTTONS            */
+/* ======================================== */
+
+/* ============ THREE-BUTTON LAYOUT ============ */
+
+#savedVehiclesList .dialog-actions,
+#savedRoutesList .dialog-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* ============ BUTTON SIZING ============ */
+
+#savedVehiclesList .dialog-actions button,
+#savedRoutesList .dialog-actions button {
+  width: 100%;
+  min-width: 0;
+  padding: 14px 4px;
+  font-size: 12px;
+  border-radius: 12px;
+}
+
+/* ============ REMOVE BUTTON ============ */
+
+#savedVehiclesList .dialog-actions .end,
+#savedRoutesList .dialog-actions .end {
+  background: linear-gradient(145deg, #a72b40, #691627);
+  border: 1px solid #c44a5e;
+  color: white;
+}
