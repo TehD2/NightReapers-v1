@@ -292,7 +292,10 @@ $("endForm").addEventListener("submit", event => {
 
 function showDashboard() {
   $("settingsScreen").hidden = true;
-  $("vehicleScreen").hidden = true;
+  $("vehicleScreen").hidden = true;  
+  $("routeScreen").hidden = true;
+
+  
   document.querySelector(".earnings").hidden = false;
   document.querySelector(".controls").hidden = false;
   document.querySelector(".history").hidden = false;
@@ -302,10 +305,13 @@ function showDashboard() {
 
 function showSettings() {
   $("vehicleScreen").hidden = true;
+  $("routeScreen").hidden = true;
   $("settingsScreen").hidden = false;
+
   document.querySelector(".earnings").hidden = true;
   document.querySelector(".controls").hidden = true;
   document.querySelector(".history").hidden = true;
+
   $("activePanel").hidden = true;
   $("settingsBtn").hidden = true;
 }
@@ -334,10 +340,7 @@ $("routeInfoBtn").addEventListener("click", () => {
   $("routeScreen").hidden = false;
 });
 
-$("backRouteSettingsBtn").addEventListener("click", () => {
-  $("routeScreen").hidden = true;
-  $("settingsScreen").hidden = false;
-});
+$("backRouteSettingsBtn").addEventListener("click", showSettings);
 
 // ============ PAY INFORMATION ============
 
