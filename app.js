@@ -281,15 +281,22 @@ $("endForm").addEventListener("submit", event => {
     alert("Ending kilometres cannot be lower than starting kilometres.");
     return;
   }
+  
+    const end = Date.now();
 
-  const end = Date.now();
-  const route = {
-    ...data.active,
-    end,
-    endKm,
-    notes: $("routeNotes").value.trim(),
-    gross: (end - data.active.start) / 3600000 * data.active.rate
-  };
+    const selectedRoute = data.savedRoutes.find(
+      saved => saved.id === data.selectedRouteId
+    );
+
+    const route = {
+      ...data.active,
+      end,
+      endKm,
+      routeNumber: selectedRoute?.number || "0000",
+      notes: $("routeNotes").value.trim(),
+      gross: (end - data.active.start) / 3600000 * data.active.rate
+    };
+
 
   data.routes.push(route);
   data.active = null;
@@ -661,8 +668,12 @@ function showReport(route) {
   const content = $("reportContent");
   content.replaceChildren();
 
+  
   const title = document.createElement("h2");
-  title.textContent = "ROUTE 6184 — SHIFT REPORT";
+  const routeNumber = route.routeNumber || "0000";
+
+
+  title.textContent = `ROUTE ${routeNumber} — SHIFT REPORT`;
   content.appendChild(title);
 
   addReportRow(content, "Date", dateText(route.start));
