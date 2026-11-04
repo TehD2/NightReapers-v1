@@ -224,6 +224,26 @@ function renderHistory(showAll = false) {
 // ========================================
 
 // ============ START ROUTE ============
+// ======= START ROUTE SELECTOR ========
+
+function populateStartRouteSelect() {
+  const select = $("startRouteSelect");
+  select.replaceChildren();
+
+  const defaultOption = new Option("Route 0000", "");
+  select.add(defaultOption);
+
+  for (const route of data.savedRoutes) {
+    const label = route.nickname
+      ? `Route ${route.number} — ${route.nickname}`
+      : `Route ${route.number}`;
+
+    select.add(new Option(label, route.id));
+  }
+
+  select.value = data.selectedRouteId || "";
+  if (select.selectedIndex === -1) select.value = "";
+}
 
 $("startBtn").addEventListener("click", () => {
   if (data.active) return;
@@ -234,6 +254,9 @@ $("startBtn").addEventListener("click", () => {
   $("plate").value = remembered?.plate || "";
   $("rememberTruck").checked = !!remembered;
   $("startKm").value = "";
+
+  populateStartRouteSelect();
+
   $("startDialog").showModal();
 });
 
@@ -247,6 +270,11 @@ $("startForm").addEventListener("submit", event => {
 
   if (!truck || !plate || !Number.isFinite(startKm) || startKm < 0) return;
 
+// ===== SELECTED ROUTE =====
+const selectedRoute = data.savedRoutes.find(
+  route => route.id === $("startRouteSelect").value
+);
+  
   // Keep the garage selection independent of the legacy Remember checkbox.
   data.vehicle = $("rememberTruck").checked ? { truck, plate } : null;
   data.active = {
@@ -254,6 +282,7 @@ $("startForm").addEventListener("submit", event => {
     truck,
     plate,
     startKm,
+    routeNumber: selectedRoute?.number || "0000",
     start: Date.now(),
     rate: Number(data.settings.rate) || 0
   };
@@ -284,15 +313,11 @@ $("endForm").addEventListener("submit", event => {
   
     const end = Date.now();
 
-    const selectedRoute = data.savedRoutes.find(
-      saved => saved.id === data.selectedRouteId
-    );
-
     const route = {
       ...data.active,
       end,
       endKm,
-      routeNumber: selectedRoute?.number || "0000",
+      routeNumber: data.active.routeNumber || "0000",
       notes: $("routeNotes").value.trim(),
       gross: (end - data.active.start) / 3600000 * data.active.rate
     };
