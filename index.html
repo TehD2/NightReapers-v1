@@ -298,6 +298,7 @@
           </div>
         </form>
 
+        
         <!-- ============ BACK TO SETTINGS ============ -->
 
         <button
@@ -309,6 +310,68 @@
         </button>
       </div>
     </section>
+
+    <!-- ======================================== -->
+    <!--          ROUTE INFORMATION SCREEN        -->
+    <!-- ======================================== -->
+
+    <section id="routeScreen" class="settings-screen" hidden>
+      <div class="settings-screen-panel">
+
+        <h2>ROUTE INFORMATION</h2>
+
+        <!-- ============ CURRENT ROUTE ============ -->
+
+        <h3>CURRENT ROUTE</h3>
+        <div id="currentRouteDisplay">
+          No route selected.
+        </div>
+
+        <!-- ============ SAVED ROUTES ============ -->
+
+        <h3>SAVED ROUTES</h3>
+        <div id="savedRoutesList">
+          No saved routes yet.
+        </div>
+
+        <!-- ============ ADD / EDIT ROUTE ============ -->
+
+        <h3>ADD / EDIT ROUTE</h3>
+
+        <form id="routeForm">
+            <label>
+              Route Number
+              <input id="routeNumber" required autocomplete="off">
+            </label>
+
+            <label>
+              Route Nickname (Optional)
+              <input id="routeNickname" autocomplete="off">
+            </label>
+
+            <div class="dialog-actions">
+              <button type="button" class="cancel" id="cancelRouteEdit">
+                CLEAR
+              </button>
+
+              <button type="submit" class="start">
+                SAVE ROUTE
+              </button>
+            </div>
+        </form>
+
+      <!-- ============ BACK TO SETTINGS ============ -->
+
+      <button
+        type="button"
+        id="backRouteSettingsBtn"
+        class="settings-option"
+      >
+        BACK TO SETTINGS
+      </button>
+
+  </div>
+</section>
 
   </main>
 
