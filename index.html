@@ -430,6 +430,31 @@
   </dialog>
 
   <!-- ======================================== -->
+  <!--         EDIT MOST RECENT SHIFT           -->
+  <!-- ======================================== -->
+
+  <dialog id="editHistoryDialog">
+    <form id="editHistoryForm">
+      <h2>Edit Most Recent Shift</h2>
+      <p id="editHistoryShiftLabel" class="hint"></p>
+      <div id="editHistoryFields">
+        <label>Route Number<input id="editHistoryRouteNumber" required autocomplete="off"></label>
+        <label>Truck Number<input id="editHistoryTruck" required autocomplete="off"></label>
+        <label>License Plate<input id="editHistoryPlate" required autocomplete="off"></label>
+        <label>Starting Kilometres<input id="editHistoryStartKm" type="number" min="0" step="1" required></label>
+        <label>Ending Kilometres<input id="editHistoryEndKm" type="number" min="0" step="1" required></label>
+        <label>Start Date &amp; Time<input id="editHistoryStart" type="datetime-local" required></label>
+        <label>End Date &amp; Time<input id="editHistoryEnd" type="datetime-local" required></label>
+        <label>Vehicle Notes (Optional)<textarea id="editHistoryNotes" rows="4"></textarea></label>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="cancel" data-close="editHistoryDialog">Cancel</button>
+        <button type="submit" class="start" id="saveEditHistoryBtn">SAVE CHANGES</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ======================================== -->
   <!--              END ROUTE DIALOG             -->
   <!-- ======================================== -->
 
