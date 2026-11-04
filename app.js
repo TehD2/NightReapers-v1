@@ -45,6 +45,13 @@ if (data.selectedRouteId === undefined) {
 
 let editingRouteId = null;
 
+// Remember the last vehicle used for each saved route.
+// Existing completed reports remain independent of these assignments.
+if (!data.routeVehicleIds || typeof data.routeVehicleIds !== "object" ||
+    Array.isArray(data.routeVehicleIds)) {
+  data.routeVehicleIds = {};
+}
+
 function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
@@ -224,20 +231,20 @@ function renderHistory(showAll = false) {
 // ========================================
 
 // ============ START ROUTE ============
-// ======= START ROUTE SELECTOR ========
+
+// ============ ROUTE SELECTOR ============
 
 function populateStartRouteSelect() {
   const select = $("startRouteSelect");
   select.replaceChildren();
 
-  const defaultOption = new Option("Route 0000", "");
-  select.add(defaultOption);
+  // Route 0000 is always the first entry.
+  select.add(new Option("Route 0000 — No Route Selected", ""));
 
   for (const route of data.savedRoutes) {
     const label = route.nickname
       ? `Route ${route.number} — ${route.nickname}`
       : `Route ${route.number}`;
-
     select.add(new Option(label, route.id));
   }
 
@@ -245,42 +252,81 @@ function populateStartRouteSelect() {
   if (select.selectedIndex === -1) select.value = "";
 }
 
+// ============ ASSIGNED VEHICLE ============
+
+function getStartVehicle() {
+  const routeId = $("startRouteSelect").value;
+  const assignedId = routeId ? data.routeVehicleIds[routeId] : null;
+  const assigned = data.vehicles.find(vehicle => vehicle.id === assignedId);
+
+  // For routes without a previous assignment, use the vehicle selected
+  // in Vehicle Information. Route 0000 uses that selection as well.
+  return assigned || data.vehicles.find(
+    vehicle => vehicle.id === data.selectedVehicleId
+  ) || null;
+}
+
+function updateStartVehicleDisplay() {
+  const vehicle = getStartVehicle();
+  const display = $("startVehicleDisplay");
+  display.replaceChildren();
+
+  if (vehicle) {
+    const name = document.createElement("strong");
+    name.textContent = vehicle.nickname || `Truck ${vehicle.truck}`;
+
+    const details = document.createElement("span");
+    details.textContent = `Truck ${vehicle.truck} • ${vehicle.plate}`;
+
+    display.append(name, details);
+  } else {
+    display.textContent = "No vehicle selected.";
+  }
+
+  $("startVehicleHint").hidden = !!vehicle;
+  $("confirmStartRouteBtn").disabled = !vehicle;
+}
+
+$("startRouteSelect").addEventListener("change", updateStartVehicleDisplay);
+
 $("startBtn").addEventListener("click", () => {
   if (data.active) return;
 
-  const selected = data.vehicles.find(vehicle => vehicle.id === data.selectedVehicleId);
-  const remembered = selected || data.vehicle;
-  $("truckNumber").value = remembered?.truck || "";
-  $("plate").value = remembered?.plate || "";
-  $("rememberTruck").checked = !!remembered;
   $("startKm").value = "";
-
   populateStartRouteSelect();
-
+  updateStartVehicleDisplay();
   $("startDialog").showModal();
 });
+
+// ============ SAVE ACTIVE SHIFT ============
 
 $("startForm").addEventListener("submit", event => {
   event.preventDefault();
   if (data.active) return;
 
-  const truck = $("truckNumber").value.trim();
-  const plate = $("plate").value.trim();
+  const vehicle = getStartVehicle();
   const startKm = Number($("startKm").value);
+  if (!vehicle || $("startKm").value === "" ||
+      !Number.isFinite(startKm) || startKm < 0) {
+    updateStartVehicleDisplay();
+    return;
+  }
 
-  if (!truck || !plate || !Number.isFinite(startKm) || startKm < 0) return;
+  const routeId = $("startRouteSelect").value;
+  const selectedRoute = data.savedRoutes.find(route => route.id === routeId);
 
-// ===== SELECTED ROUTE =====
-const selectedRoute = data.savedRoutes.find(
-  route => route.id === $("startRouteSelect").value
-);
-  
-  // Keep the garage selection independent of the legacy Remember checkbox.
-  data.vehicle = $("rememberTruck").checked ? { truck, plate } : null;
+  // Save the vehicle used for this route, without modifying past reports.
+  if (selectedRoute) data.routeVehicleIds[selectedRoute.id] = vehicle.id;
+
+  // Remember the route picked in this dialog for the next shift.
+  data.selectedRouteId = selectedRoute?.id || null;
+
   data.active = {
-    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
-    truck,
-    plate,
+    id: typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random()}`,
+    truck: vehicle.truck,
+    plate: vehicle.plate,
     startKm,
     routeNumber: selectedRoute?.number || "0000",
     start: Date.now(),
@@ -483,6 +529,11 @@ function renderVehicles() {
         clearVehicleForm();
       }
 
+      // Remove references to this vehicle from saved route assignments.
+      for (const [routeId, vehicleId] of Object.entries(data.routeVehicleIds)) {
+        if (vehicleId === vehicle.id) delete data.routeVehicleIds[routeId];
+      }
+
       save();
       renderVehicles();
     });
@@ -603,6 +654,7 @@ function renderRoutes() {
       if (data.selectedRouteId === route.id) {
         data.selectedRouteId = null;
       }
+      delete data.routeVehicleIds[route.id];
 
       if (editingRouteId === route.id) {
         clearRouteForm();
