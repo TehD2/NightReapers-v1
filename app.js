@@ -438,12 +438,6 @@ function renderVehicles() {
     removeButton.textContent = "REMOVE";
 
     removeButton.addEventListener("click", () => {
-      const confirmed = window.confirm(
-        `Remove Truck ${vehicle.truck} (${vehicle.plate}) from saved vehicles?`
-      );
-
-      if (!confirmed) return;
-
       data.vehicles = data.vehicles.filter(
         savedVehicle => savedVehicle.id !== vehicle.id
       );
@@ -570,12 +564,6 @@ function renderRoutes() {
     removeBtn.textContent = "REMOVE";
 
     removeBtn.addEventListener("click", () => {
-      const confirmed = window.confirm(
-        `Remove Route ${route.number} from saved routes?`
-      );
-
-      if (!confirmed) return;
-
       data.savedRoutes = data.savedRoutes.filter(
         savedRoute => savedRoute.id !== route.id
       );
