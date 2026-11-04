@@ -430,7 +430,38 @@ function renderVehicles() {
       $("vehicleNickname").focus();
     });
 
-    actions.append(useButton, editButton);
+    // ============ REMOVE VEHICLE ============
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "end";
+    removeButton.textContent = "REMOVE";
+
+    removeButton.addEventListener("click", () => {
+      const confirmed = window.confirm(
+        `Remove Truck ${vehicle.truck} (${vehicle.plate}) from saved vehicles?`
+      );
+
+      if (!confirmed) return;
+
+      data.vehicles = data.vehicles.filter(
+        savedVehicle => savedVehicle.id !== vehicle.id
+      );
+
+      if (data.selectedVehicleId === vehicle.id) {
+        data.selectedVehicleId = null;
+        data.vehicle = null;
+      }
+
+      if (editingVehicleId === vehicle.id) {
+        clearVehicleForm();
+      }
+
+      save();
+      renderVehicles();
+    });
+
+    actions.append(useButton, editButton, removeButton);
     item.appendChild(actions);
     list.appendChild(item);
   }
@@ -531,7 +562,37 @@ function renderRoutes() {
         .textContent = "SAVE CHANGES";
     });
 
-    actions.append(selectBtn, editBtn);
+    // ============ REMOVE ROUTE ============
+
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "end";
+    removeBtn.textContent = "REMOVE";
+
+    removeBtn.addEventListener("click", () => {
+      const confirmed = window.confirm(
+        `Remove Route ${route.number} from saved routes?`
+      );
+
+      if (!confirmed) return;
+
+      data.savedRoutes = data.savedRoutes.filter(
+        savedRoute => savedRoute.id !== route.id
+      );
+
+      if (data.selectedRouteId === route.id) {
+        data.selectedRouteId = null;
+      }
+
+      if (editingRouteId === route.id) {
+        clearRouteForm();
+      }
+
+      save();
+      renderRoutes();
+    });
+
+    actions.append(selectBtn, editBtn, removeBtn);
     item.append(label, actions);
     list.appendChild(item);
   }
