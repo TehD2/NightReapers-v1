@@ -390,20 +390,17 @@
         </select>
       </div>
 
-      <label>
-        Truck Number
-        <input id="truckNumber" required autocomplete="off">
-      </label>
+      <!-- ============ ASSIGNED VEHICLE ============ -->
 
-      <label>
-        License Plate
-        <input id="plate" required autocomplete="off">
-      </label>
-
-      <label class="check">
-        <input type="checkbox" id="rememberTruck">
-        Remember truck and plate
-      </label>
+      <div class="assigned-vehicle-section">
+        <div class="assigned-vehicle-label">ASSIGNED VEHICLE</div>
+        <div id="startVehicleDisplay" class="assigned-vehicle-card" aria-live="polite">
+          No vehicle selected.
+        </div>
+        <p id="startVehicleHint" class="assigned-vehicle-hint" hidden>
+          Select a vehicle in Settings → Vehicle Information before starting a route.
+        </p>
+      </div>
 
       <label>
         Current Kilometres
@@ -425,7 +422,7 @@
           Cancel
         </button>
 
-        <button type="submit" class="start">
+        <button type="submit" class="start" id="confirmStartRouteBtn">
           START ROUTE
         </button>
       </div>
