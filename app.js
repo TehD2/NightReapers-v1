@@ -23,6 +23,33 @@ function loadData() {
 
 let data = loadData();
 
+// ============ EARNINGS PRIVACY ============
+
+// Display-only preference. Pay calculations and saved shift data are unchanged.
+if (typeof data.earningsHidden !== "boolean") data.earningsHidden = false;
+
+function updateEarningsVisibility() {
+  const hidden = data.earningsHidden;
+  const button = $("earningsVisibilityBtn");
+  const icon = $("earningsEyeIcon");
+  const action = hidden ? "Reveal" : "Hide";
+
+  button.setAttribute("aria-label", `${action} estimated earnings`);
+  button.setAttribute("aria-pressed", String(hidden));
+  button.title = `${action} estimated earnings`;
+
+  // Eye = visible; crossed-out eye = hidden.
+  icon.innerHTML = hidden
+    ? '<path d="M3 3l18 18"/><path d="M10.6 5.1A10.7 10.7 0 0 1 12 5c6.5 0 10 7 10 7a15.5 15.5 0 0 1-3.3 4.2"/><path d="M6.3 6.3C3.5 8.2 2 12 2 12s3.5 7 10 7a10 10 0 0 0 4.2-.9"/><path d="M10 10a3 3 0 0 0 4 4"/>'
+    : '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>';
+}
+
+$("earningsVisibilityBtn").addEventListener("click", () => {
+  data.earningsHidden = !data.earningsHidden;
+  save();
+  render();
+});
+
 // Preserve existing v1 records while introducing a saved-vehicle garage.
 if (!Array.isArray(data.vehicles)) data.vehicles = [];
 if (!data.settings || typeof data.settings !== "object") {
@@ -110,6 +137,7 @@ function weekBounds() {
 // ========================================
 
 function render() {
+  updateEarningsVisibility();
   const [from, to] = weekBounds();
   const weekly = data.routes.filter(r => r.start >= from && r.start < to);
   const hoursMs = weekly.reduce((sum, r) => sum + r.end - r.start, 0);
@@ -120,7 +148,7 @@ function render() {
     gross += (Date.now() - data.active.start) / 3600000 * data.active.rate;
   }
 
-  $("weeklyGross").textContent = money(gross);
+  $("weeklyGross").textContent = data.earningsHidden ? "••••••" : money(gross);
   $("weeklyHours").textContent = duration(hoursMs +
     (data.active && data.active.start >= from && data.active.start < to
       ? Date.now() - data.active.start : 0));
@@ -140,9 +168,9 @@ function render() {
     $("routeTimer").textContent = timer(Date.now() - data.active.start);
     $("activeTruck").textContent =
       `Truck ${data.active.truck} • ${data.active.plate}`;
-    $("livePay").textContent = money(
-      (Date.now() - data.active.start) / 3600000 * data.active.rate
-    );
+    $("livePay").textContent = data.earningsHidden
+      ? "••••••"
+      : money((Date.now() - data.active.start) / 3600000 * data.active.rate);
   }
 
   renderHistory();
