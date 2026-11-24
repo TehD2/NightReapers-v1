@@ -97,7 +97,7 @@
 
       <div class="stats">
         <div>
-          <small>Driving Hours</small>
+          <small>Paid Hours</small>
           <strong id="weeklyHours">0h 00m</strong>
         </div>
 
@@ -115,14 +115,20 @@
 
     <!-- ============ ROUTE BUTTONS ============ -->
 
-    <div class="controls">
-      <button class="start" id="startBtn" type="button">
-        START ROUTE
-      </button>
-
-      <button class="end" id="endBtn" type="button" disabled>
-        END ROUTE
-      </button>
+    <div class="controls" id="workControls">
+      <button class="start" id="workBtn" type="button">START WORKDAY</button>
+      <div id="workStatus" hidden></div>
+      <div class="nr-task-grid" id="taskButtons">
+<button type="button" class="cancel" data-task="Package Handler">Package Handler</button>
+<button type="button" class="cancel" data-task="Training">Training</button>
+<button type="button" class="cancel" data-task="Route 6184">Route 6184</button>
+<button type="button" class="cancel" data-task="Vehicle Movement">Vehicle Movement</button>
+<button type="button" class="cancel" data-task="Break">Break</button>
+<button type="button" class="cancel" data-task="Janitorial">Janitorial</button>
+      </div>
+      <div id="breakPanel" hidden><div class="timer" id="breakTimer"></div><button id="endBreak" class="cancel">END BREAK</button></div>
+      <button id="startBtn" type="button" hidden>START ROUTE</button>
+      <button id="endBtn" class="end" type="button" hidden>END ROUTE</button>
     </div>
 
     <!-- ============ SETTINGS BUTTON ============ -->
@@ -167,10 +173,15 @@
 
     <!-- ============ ROUTE HISTORY ============ -->
 
+    <section class="panel" id="taskHistoryPanel">
+      <div class="history-heading"><h2>Task History</h2><button class="text-btn" id="taskCollapse" aria-expanded="false">⌄</button></div>
+      <div id="taskHistory" hidden></div>
+    </section>
     <section class="panel history">
       <div class="history-heading">
         <h2>Route History</h2>
 
+        <button class="text-btn" id="routeCollapse" aria-expanded="true">⌃</button>
         <button class="text-btn" id="viewAllBtn" type="button">
           View All ›
         </button>
@@ -206,7 +217,7 @@
           id="vehicleInfoBtn"
           class="settings-option"
         >
-          VEHICLE INFORMATION
+          VEHICLE INFO
         </button>
 
         <!-- ============ ROUTE INFORMATION ============ -->
@@ -216,7 +227,7 @@
           id="routeInfoBtn"
           class="settings-option"
         >
-          ROUTE INFORMATION
+          ROUTE INFO
         </button>
         
         <!-- ============ EDIT ROUTE HISTORY ============ -->
@@ -226,8 +237,10 @@
           id="editHistoryBtn"
           class="settings-option"
         >
-          EDIT ROUTE HISTORY
+          EDIT ROUTE
         </button>
+        <button class="settings-option" id="editWorkBtn">EDIT WORKDAY</button>
+        <button class="settings-option" id="backupBtn">BACKUP &amp; RESTORE</button>
 
         <!-- ============ BACK TO DASHBOARD ============ -->
 
@@ -239,7 +252,7 @@
           BACK TO DASHBOARD
         </button>
 
-        <p class="settings-version">NightReapers v1.05</p>
+        <p class="settings-version">NightReapers v1.06</p>
       </div>
     </section>
 
@@ -522,7 +535,7 @@
       <h2>Settings</h2>
 
       <label>
-        Driving Hourly Rate (CAD)
+        Base Hourly Rate (CAD)
         <input
           id="hourlyRate"
           type="number"
@@ -607,5 +620,8 @@
     </div>
   </div>
 
+  <dialog id="workEditDialog"><form id="workEditForm"><h2>Edit Workday</h2><div id="workEditFields"></div><div class="dialog-actions"><button type="button" class="cancel" data-close="workEditDialog">Cancel</button><button class="start" type="submit">Save Changes</button></div></form></dialog>
+  <dialog id="backupDialog"><h2>Backup &amp; Restore</h2><p>Full backups contain private pay information. Work reports exclude it.</p><label>Recipient email (optional)<input id="backupEmail" type="email"></label><button class="settings-option" id="downloadBackup">DOWNLOAD BACKUP</button><button class="settings-option" id="emailBackup">EMAIL BACKUP</button><button class="settings-option" id="emailReport">EMAIL WORK REPORT</button><label>Import backup<input type="file" id="importBackup" accept=".json,application/json"></label><button class="cancel" data-close="backupDialog">Close</button></dialog>
+  <dialog id="workDone"><h2>Workday completed</h2><p>Another workday ended. Remember to edit your workday afterwards if you missed something.</p><button class="cancel" data-close="workDone">Close</button></dialog>
 </body>
 </html>

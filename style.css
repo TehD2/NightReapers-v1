@@ -1118,3 +1118,23 @@ dialog .check { display: flex; align-items: center; gap: 10px; }
   color: var(--muted);
   font-size: 12px;
 }
+
+/* #021: preserve original settings pill; compact workday controls */
+#workControls {display:flex;flex-direction:column;gap:10px;}
+#workControls > button {width:100%;}
+.nr-task-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+.nr-task-grid button {min-height:44px;padding:8px;font-size:14px;}
+.nr-task-grid .nr-selected {border-color:#a16ac9;background:#493255;}
+#workStatus,#breakPanel {padding:12px;background:#202226;border-radius:12px;}
+#settingsBtn {height:auto;min-height:36px;max-height:44px;flex:none;align-self:stretch;}
+#taskHistory {max-height:480px;overflow:auto;}
+#routeHistory {max-height:480px;overflow:auto;}
+.nr-ledger-group {margin:6px 0;padding:6px;border:1px solid #45464a;border-radius:8px;}
+.nr-ledger-group summary {cursor:pointer;font-size:13px;overflow-wrap:anywhere;padding:5px 0;}
+.nr-ledger-line {display:block;text-align:left;width:100%;padding:8px 4px;background:transparent;border:0;color:inherit;}
+.nr-ledger-line small {display:block;opacity:.75;margin-top:4px;}
+#settingsScreen .settings-screen-panel {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+#settingsScreen h2,#payInfoBtn,#backupBtn,#backDashboardBtn,#settingsScreen .settings-version {grid-column:1/-1;}
+#settingsScreen .settings-option {margin:0;min-width:0;}
+.nr-edit-row {padding:10px 0;border-bottom:1px solid #555;}
+#workEditFields {max-height:55vh;overflow:auto;}

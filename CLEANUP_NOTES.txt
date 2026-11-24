@@ -1,21 +1,44 @@
-NightReapers cleanup — 2026-11-02
+NightReapers — v1.06 | Update #021
+2026-11-24
 
-Preserved:
-- Existing visual design, sleep artwork, route flow, history and reports.
-- Browser storage key nightreapers_v1 (existing route records remain compatible).
-- Latest-route-only deletion behavior and Ko-fi link.
+**Preserved:**
+- Original visual design, artwork and hexagonal borders.
+- Original slim Settings button.
+- Existing route records, reports and vehicle information.
+- Browser storage key `nightreapers_v1`.
+- Sleep Mode and Waiting Mode.
+- Ko-fi support link.
 
-Changed:
-- Normalized header and sleep-screen HTML indentation.
-- Consolidated overlapping history/sleep CSS rules.
-- Removed unused .sleep-route-text and pulse animation rules.
-- No JavaScript logic changes.
+**Changed:**
+- Added Start/End Workday controls.
+- Added six selectable workday tasks.
+- Added automatic task timestamp recording.
+- Added strict 30-minute unpaid break.
+- Added paid Unassigned time.
+- Replaced Driving Hours with Paid Hours.
+- Updated estimated Weekly Gross calculations.
+- Added collapsible Task History.
+- Retained Route History with View All / Show Less.
+- Reorganized Settings.
+- Added Edit Workday for the latest completed workday.
+- Added backup, restore and email-sharing options.
+- Added End Workday confirmation and completion reminder.
 
-Important:
-- Route records are stored in your browser, not inside this ZIP.
-- Use Settings > Export Backup before switching browsers, clearing site data,
-  or replacing your working folder. Export creates JSON; the app does not
-  currently provide a JSON import function.
-- Replacing the project files at the same origin does not intentionally reset
-  localStorage. Opening from a different URL/origin may show empty records.
-- Check the dashboard, sleep animation and history after replacing files.
+**Important:**
+- Existing records are stored locally, not inside the ZIP.
+- Export a backup before replacing project files.
+- Full backups contain private payroll information.
+- Management work reports should exclude payroll information.
+- Weekly Gross currently uses the configured base hourly rate.
+
+**Pending verification:**
+- Local browser functionality.
+- Existing record compatibility.
+- Backup and restore functionality.
+- Workday recovery after closing the application.
+- Honeywell CT60 compatibility.
+
+**Future updates:**
+- Dayforce payroll reconciliation.
+- Overtime and special pay rates.
+- Android APK packaging.
