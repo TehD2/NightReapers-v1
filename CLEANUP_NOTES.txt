@@ -42,3 +42,12 @@ NightReapers — v1.06 | Update #021
 - Dayforce payroll reconciliation.
 - Overtime and special pay rates.
 - Android APK packaging.
+
+
+#022 / v1.07 — Active route patch
+Route controls replace workday controls; arrival/departure timestamps, optional fuel top-up notes, post-trip inspection, midnight display and version label. Existing storage key retained. Task History and Weekly Gross now use Sunday–Saturday payroll weeks; other payroll and analytics changes deferred. Older backups are regrouped by workday start date without altering timestamps. Device testing required.
+
+
+#022 final revision: Payroll start is editable; FMAS ledger remains Sunday–Saturday. Latest workday deletion also removes exclusively linked routes after confirmation. Route button follows selected preset. Top Ups appear between route start and end.
+
+#022 deletion refinement: inline muted-red X, latest eligible record only, no deletion during active work, YES then exact DELETE. Eligibility persists in backups; deleting does not unlock older records. Route deletion retains linked paid task time with a removed-record label; workday deletion retains saved routes. Payroll week remains editable independently of Sunday–Saturday FMAS grouping. Top Ups remain between route start/end in Task History.

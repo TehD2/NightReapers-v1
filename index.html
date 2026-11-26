@@ -15,9 +15,9 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" href="assets/NR-W.png">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/NR-iOS.png">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=107">
 
-  <script src="app.js" defer></script>
+  <script src="app.js?v=107b" defer></script>
 </head>
 
 <body>
@@ -67,7 +67,7 @@
           class="kofi-link"
         >
           ☕ Support the Reaper
-        </a>
+        </a><div class="nr-version">v1.07</div>
       </div>
     </header>
 
@@ -121,14 +121,17 @@
       <div class="nr-task-grid" id="taskButtons">
 <button type="button" class="cancel" data-task="Package Handler">Package Handler</button>
 <button type="button" class="cancel" data-task="Training">Training</button>
-<button type="button" class="cancel" data-task="Route 6184">Route 6184</button>
+<button type="button" class="cancel" data-task="Route">Route</button>
 <button type="button" class="cancel" data-task="Vehicle Movement">Vehicle Movement</button>
 <button type="button" class="cancel" data-task="Break">Break</button>
 <button type="button" class="cancel" data-task="Janitorial">Janitorial</button>
       </div>
       <div id="breakPanel" hidden><div class="timer" id="breakTimer"></div><button id="endBreak" class="cancel">END BREAK</button></div>
       <button id="startBtn" type="button" hidden>START ROUTE</button>
-      <button id="endBtn" class="end" type="button" hidden>END ROUTE</button>
+      <div id="routeModeControls" class="nr-task-grid" hidden>
+<button id="arrivalBtn" class="cancel" type="button">📍 Arrival</button><button id="departureBtn" class="cancel" type="button">🚚 Departure</button>
+<button id="sleepBtn" class="sleep-btn" type="button">☾ Sleep Mode</button><button id="waitingModeBtn" class="sleep-btn" type="button">🧸 Waiting Mode</button>
+<button id="topUpBtn" class="cancel" type="button">⛽ Top Up</button><button id="endBtn" class="end" type="button">🏁 End Route</button></div>
     </div>
 
     <!-- ============ SETTINGS BUTTON ============ -->
@@ -154,21 +157,6 @@
         <strong id="livePay">$0.00</strong>
       </p>
 
-      <!-- ============ ROUTE MODE CONTROLS ============ -->
-
-      <div
-        id="routeModeControls"
-        class="route-mode-controls"
-        hidden
-      >
-        <button class="sleep-btn" id="sleepBtn" type="button">
-          ☾ Sleep Mode
-        </button>
-
-        <button class="sleep-btn" id="waitingModeBtn" type="button">
-          🧸 Waiting Mode
-        </button>
-      </div>
     </section>
 
     <!-- ============ ROUTE HISTORY ============ -->
@@ -476,7 +464,7 @@
         <label>Starting Kilometres<input id="editHistoryStartKm" type="number" min="0" step="1" required></label>
         <label>Ending Kilometres<input id="editHistoryEndKm" type="number" min="0" step="1" required></label>
         <label>Start Date &amp; Time<input id="editHistoryStart" type="datetime-local" required></label>
-        <label>End Date &amp; Time<input id="editHistoryEnd" type="datetime-local" required></label>
+        <label>Arrival (Optional)<input id="editArrival" type="datetime-local"></label><label>Departure (Optional)<input id="editDeparture" type="datetime-local"></label><label>End Date &amp; Time<input id="editHistoryEnd" type="datetime-local" required></label>
         <label>Vehicle Notes (Optional)<textarea id="editHistoryNotes" rows="4"></textarea></label>
       </div>
       <div class="dialog-actions">
@@ -532,7 +520,7 @@
 
   <dialog id="settingsDialog">
     <form id="settingsForm">
-      <h2>Settings</h2>
+      <h2>Pay Information</h2>
 
       <label>
         Base Hourly Rate (CAD)
@@ -559,7 +547,7 @@
       </label>
 
       <p class="hint">
-        Friday is provisional until you confirm your pay period.
+        Payroll week is editable. FMAS Task History always runs Sunday through Saturday.
       </p>
 
       <button
@@ -623,5 +611,9 @@
   <dialog id="workEditDialog"><form id="workEditForm"><h2>Edit Workday</h2><div id="workEditFields"></div><div class="dialog-actions"><button type="button" class="cancel" data-close="workEditDialog">Cancel</button><button class="start" type="submit">Save Changes</button></div></form></dialog>
   <dialog id="backupDialog"><h2>Backup &amp; Restore</h2><p>Full backups contain private pay information. Work reports exclude it.</p><label>Recipient email (optional)<input id="backupEmail" type="email"></label><button class="settings-option" id="downloadBackup">DOWNLOAD BACKUP</button><button class="settings-option" id="emailBackup">EMAIL BACKUP</button><button class="settings-option" id="emailReport">EMAIL WORK REPORT</button><label>Import backup<input type="file" id="importBackup" accept=".json,application/json"></label><button class="cancel" data-close="backupDialog">Close</button></dialog>
   <dialog id="workDone"><h2>Workday completed</h2><p>Another workday ended. Remember to edit your workday afterwards if you missed something.</p><button class="cancel" data-close="workDone">Close</button></dialog>
+<dialog id="deleteRecordDialog">
+  <div id="deleteStageOne"><h2>Are you sure?</h2><p id="deleteRecordText"></p><div class="dialog-actions"><button type="button" class="end" id="deleteYes">YES</button><button type="button" class="cancel" id="deleteNo">NO</button></div></div>
+  <div id="deleteStageTwo" hidden><h2>Confirm Deletion</h2><p>Type DELETE to confirm. This cannot be undone.</p><input id="deleteRecordInput" aria-label="Type DELETE" autocomplete="off" spellcheck="false"><div class="dialog-actions"><button type="button" class="cancel" id="deleteCancel">CANCEL</button><button type="button" class="end" id="deleteFinal" disabled>DELETE</button></div></div>
+</dialog>
 </body>
 </html>

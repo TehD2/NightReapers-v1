@@ -17,7 +17,7 @@ function loadData() {
     routes: [],
     active: null,
     vehicle: null,
-    settings: { rate: 0, weekStart: 5 }
+    settings: { rate: 0, weekStart: 0 }
   };
 }
 
@@ -53,8 +53,11 @@ $("earningsVisibilityBtn").addEventListener("click", () => {
 // Preserve existing v1 records while introducing a saved-vehicle garage.
 if (!Array.isArray(data.vehicles)) data.vehicles = [];
 if (!data.settings || typeof data.settings !== "object") {
-  data.settings = { rate: 0, weekStart: 5 };
+  data.settings = { rate: 0, weekStart: 0 };
 }
+
+// Payroll preference is independent of FMAS grouping.
+if (!Number.isInteger(Number(data.settings.weekStart)) || Number(data.settings.weekStart)<0 || Number(data.settings.weekStart)>6) data.settings.weekStart=0;
 
 let editingVehicleId = null;
 
@@ -115,18 +118,16 @@ function dateText(timestamp) {
 
 function timeText(timestamp) {
   return new Date(timestamp).toLocaleTimeString("en-CA", {
-    hour: "2-digit", minute: "2-digit", hour12: false
+    hour: "2-digit", minute: "2-digit", hourCycle: "h23"
   });
 }
 
 // ============ PAYROLL WEEK ============
 
-function weekBounds(timestamp = Date.now()) {
+function weekBounds(timestamp = Date.now(), weekStart = Number(data.settings.weekStart)) {
   const now = new Date(timestamp);
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const day = start.getDay();
-  const weekStart = Number((data.settings.weekStart == null ? 5 : data.settings.weekStart));
-  start.setDate(start.getDate() - (day - weekStart + 7) % 7);
+  start.setDate(start.getDate() - ((start.getDay()-weekStart+7)%7));
   const end = new Date(start);
   end.setDate(end.getDate() + 7);
   return [start.getTime(), end.getTime()];
@@ -228,28 +229,8 @@ function renderHistory() {
     report.addEventListener("click", () => showReport(route));
     item.appendChild(report);
 
-    // Only the most recent completed route can be deleted.
-    if (route === routes[0] && !allWorkdays().some(w=>w.tasks.some(t=>t.routeId===route.id))) {
-      const trash = document.createElement("button");
-      trash.type = "button";
-      trash.className = "delete-route";
-      trash.textContent = "×";
-      trash.title = "Delete most recent route";
-      trash.setAttribute("aria-label", "Delete most recent route");
-
-      trash.addEventListener("click", () => {
-        const date = dateText(route.start);
-
-        if (!confirm(`Delete route from ${date}?\n\nThis cannot be undone.`)) {
-          return;
-        }
-
-        data.routes = data.routes.filter(r => r.id !== route.id);
-        save();
-        render();
-      });
-
-      item.appendChild(trash);
+    if (canDeleteRecord('route', route.id)) {
+      item.appendChild(deleteControl('route', route.id));
     }
 
     container.appendChild(item);
@@ -367,6 +348,7 @@ $("startForm").addEventListener("submit", event => {
   // Remember the route picked in this dialog for the next shift.
   data.selectedRouteId = selectedRoute ? selectedRoute.id : null;
 
+  data.deleteEligibility.route = null;
   data.active = {
     id: typeof crypto.randomUUID === "function"
       ? crypto.randomUUID()
@@ -379,7 +361,7 @@ $("startForm").addEventListener("submit", event => {
     rate: Number(data.settings.rate) || 0
   };
 
-  switchTask("Route 6184", data.active.start, data.active.id);
+  switchTask("Route " + data.active.routeNumber, data.active.start, data.active.id);
   save();
   $("startDialog").close();
   render();
@@ -417,8 +399,9 @@ $("endForm").addEventListener("submit", event => {
 
 
   data.routes.push(route);
+  data.deleteEligibility.route = route.id;
   data.active = null;
-  if(data.workday) switchTask("Unassigned",end);
+  if(data.workday) switchTask("Post-Trip Inspection",end);
   save();
   $("endDialog").close();
   render();
@@ -464,7 +447,7 @@ $("backVehicleSettingsBtn").addEventListener("click", showSettings);
 
 $("payInfoBtn").addEventListener("click", () => {
   $("hourlyRate").value = (data.settings.rate == null ? 0 : data.settings.rate);
-  $("weekStart").value = String((data.settings.weekStart == null ? 5 : data.settings.weekStart));
+  $("weekStart").value = String(data.settings.weekStart);
   $("settingsDialog").showModal();
 });
 
@@ -523,6 +506,8 @@ $("editHistoryBtn").addEventListener("click", () => {
     $("editHistoryStart").value = toLocalDateTimeInput(route.start);
     $("editHistoryEnd").value = toLocalDateTimeInput(route.end);
     $("editHistoryNotes").value = route.notes || "";
+    $("editArrival").value = route.arrival ? toLocalDateTimeInput(route.arrival) : "";
+    $("editDeparture").value = route.departure ? toLocalDateTimeInput(route.departure) : "";
   }
   $("editHistoryDialog").showModal();
 });
@@ -552,11 +537,15 @@ $("editHistoryForm").addEventListener("submit", event => {
 
   const linkedWork = allWorkdays().find(w=>w.tasks.some(t=>t.routeId===route.id));
   if(linkedWork && (start!==Math.floor(route.start/60000)*60000 || end!==Math.floor(route.end/60000)*60000)){alert("Linked route times are locked to preserve the workday timeline. Odometer and notes may be edited.");return;}
+  const actualStart=linkedWork?route.start:start, actualEnd=linkedWork?route.end:end;
+  const readStamp=(id,old)=>{const v=$(id).value;return !v?null:old&&v===toLocalDateTimeInput(old)?old:new Date(v).getTime();};
+  const arrival=readStamp("editArrival",route.arrival), departure=readStamp("editDeparture",route.departure);
+  if([arrival,departure].some(v=>v!==null&&(!Number.isFinite(v)||v<Math.floor(actualStart/60000)*60000||v>actualEnd))||(arrival!==null&&departure!==null&&arrival>departure)){alert("Arrival and departure must be in route order and within the route.");return;}
   // Update the same completed record; leave vehicle/route presets and active shift alone.
   Object.assign(route, {
-    routeNumber, truck, plate, startKm, endKm, start:linkedWork?route.start:start, end:linkedWork?route.end:end,
+    arrival, departure, routeNumber, truck, plate, startKm, endKm, start:linkedWork?route.start:start, end:linkedWork?route.end:end,
     notes: $("editHistoryNotes").value.trim(),
-    gross: (end - start) / 3600000 * (Number(route.rate) || 0)
+    gross: (actualEnd - actualStart) / 3600000 * (Number(route.rate) || 0)
   });
   save();
   $("editHistoryDialog").close();
@@ -911,7 +900,10 @@ function showReport(route) {
   addReportRow(content, "Truck", route.truck);
   addReportRow(content, "Plate", route.plate);
   addReportRow(content, "Start", timeText(route.start));
+  addReportRow(content, "Arrival", route.arrival ? timeText(route.arrival) : "—");
+  addReportRow(content, "Departure", route.departure ? timeText(route.departure) : "—");
   addReportRow(content, "End", timeText(route.end));
+  (route.topUps||[]).forEach(u=>addReportRow(content,"Top Up",timeText(u.at)+(u.notes?" | "+u.notes:"")));
   addReportRow(content, "Duration", duration(route.end - route.start));
   addReportRow(content, "Starting KM", `${route.startKm} km`);
   addReportRow(content, "Ending KM", `${route.endKm} km`);
@@ -1046,6 +1038,7 @@ if (startupReaper) {
 // ============ STARTUP TRANSITION ============
 
 const startupScreen = document.getElementById("startupScreen");
+let waitingOpen=false;
 
 if (startupScreen) {
   const blackout = document.createElement("div");
@@ -1056,7 +1049,7 @@ if (startupScreen) {
     blackout.classList.add("visible");
 
     setTimeout(() => {
-      startupScreen.style.display = "none";
+      if (!waitingOpen) startupScreen.style.display = "none";
       blackout.classList.remove("visible");
 
       setTimeout(() => {
@@ -1076,6 +1069,8 @@ if (waitingModeBtn && startupScreen) {
   waitingModeBtn.addEventListener("click", () => {
     if (!data.active) return;
 
+    waitingOpen=true;
+    startupReaper.src="assets/waiting-reaper/WR-1.png";
     startupScreen.classList.remove("fade-out");
     startupScreen.style.opacity = "0";
     startupScreen.style.display = "block";
@@ -1096,11 +1091,12 @@ if (startupScreen) {
     if (!data.active) return;
     if (startupScreen.style.display !== "block") return;
 
+    waitingOpen=false;
     startupScreen.style.pointerEvents = "none";
     startupScreen.style.opacity = "0";
 
     setTimeout(() => {
-      startupScreen.style.display = "none";
+      if(!waitingOpen) startupScreen.style.display = "none";
     }, 1000);
   });
 }
@@ -1108,32 +1104,63 @@ if (startupScreen) {
 // #021 — workday ledger (same local storage, no external dependencies)
 if (!Array.isArray(data.workdays)) data.workdays = [];
 if (!data.workday) data.workday = null;
+function newestRecord(records){return records.slice().sort((a,b)=>b.start-a.start)[0];}
+if (!data.deleteEligibility || typeof data.deleteEligibility !== 'object') {
+  data.deleteEligibility={route:data.workday||data.active?null:newestRecord(data.routes)?.id??null,workday:data.workday||data.active?null:newestRecord(data.workdays)?.id??null};
+  save();
+}
+function canDeleteRecord(kind,id){
+  const records=kind==='route'?data.routes:data.workdays;
+  return !data.workday&&!data.active&&data.deleteEligibility[kind]===id&&newestRecord(records)?.id===id;
+}
+function deleteControl(kind,id){
+  const b=nrNode('button','×','delete-route'+(kind==='workday'?' delete-workday':''));
+  b.type='button';b.title='Delete most recent '+kind;b.setAttribute('aria-label',b.title);
+  b.onclick=e=>{e.preventDefault();e.stopPropagation();if(!canDeleteRecord(kind,id))return;
+    const dialog=$('deleteRecordDialog'), text=$('deleteRecordText'), input=$('deleteRecordInput');
+    text.textContent='Delete this '+kind+'? '+(kind==='route'?'Linked work time will remain in Task History.':'Saved routes will remain in Route History.');
+    $('deleteStageOne').hidden=false;$('deleteStageTwo').hidden=true;input.value='';$('deleteFinal').disabled=true;
+    $('deleteYes').onclick=()=>{$('deleteStageOne').hidden=true;$('deleteStageTwo').hidden=false;input.focus();};
+    $('deleteNo').onclick=$('deleteCancel').onclick=()=>dialog.close();
+    input.oninput=()=>{$('deleteFinal').disabled=input.value!=='DELETE';};input.onpaste=e=>e.preventDefault();
+    $('deleteFinal').onclick=()=>{if(input.value!=='DELETE'||!canDeleteRecord(kind,id))return;
+      if(commitWork(()=>{data.deleteEligibility[kind]=null;
+        if(kind==='route'){const r=data.routes.find(x=>x.id===id);data.routes=data.routes.filter(x=>x.id!==id);allWorkdays().forEach(w=>w.tasks.forEach(t=>{if(t.routeId===id){t.routeId=null;t.type='Route '+r.routeNumber+' (route record removed)';}}));}
+        else data.workdays=data.workdays.filter(x=>x.id!==id);
+      }))dialog.close();
+    };dialog.showModal();
+  };return b;
+}
 function allWorkdays(){return data.workdays.concat(data.workday?[data.workday]:[]);}
 function currentTask(){return data.workday && data.workday.tasks[data.workday.tasks.length-1];}
 function switchTask(type,at,routeId){const w=data.workday;if(!w)return;const t=currentTask();if(t&&t.type===type)return;if(t)t.end=at;w.tasks.push({type,start:at,end:null,routeId:routeId||null});}
 function paidMs(w,from=-Infinity,to=Infinity){return w.tasks.reduce((sum,t)=>sum+(t.type==='Break'?0:Math.max(0,Math.min(t.end==null?Date.now():t.end,to)-Math.max(t.start,from))),0);}
 function commitWork(change){const before=JSON.stringify(data);try{change();save();}catch(e){data=JSON.parse(before);alert('Could not save. Your change was not committed.');return false;}render();return true;}
-$('workBtn').onclick=()=>{if(!data.workday){if(data.active){alert('Finish your existing route first.');return;}commitWork(()=>{const now=Date.now();data.workday={id:String(now),start:now,end:null,tasks:[]};switchTask('Unassigned',now);});return;}if(data.active||currentTask().type==='Break')return;if(!confirm('End your workday?')||!confirm('Are you sure?'))return;if(commitWork(()=>{const now=Date.now();currentTask().end=now;data.workday.end=now;data.workdays.push(data.workday);data.workday=null;}))$('workDone').showModal();};
-document.querySelectorAll('[data-task]').forEach(b=>b.onclick=()=>{if(!data.workday||data.active||currentTask().type==='Break'||currentTask().type===b.dataset.task)return;if(b.dataset.task==='Route 6184')$('startBtn').click();else commitWork(()=>switchTask(b.dataset.task,Date.now()));});
+$('workBtn').onclick=()=>{if(!data.workday){if(data.active){alert('Finish your existing route first.');return;}commitWork(()=>{const now=Date.now();data.deleteEligibility.route=null;data.deleteEligibility.workday=null;data.workday={id:String(now),start:now,end:null,tasks:[]};switchTask('Unassigned',now);});return;}if(data.active||currentTask().type==='Break')return;if(!confirm('End your workday?')||!confirm('Are you sure?'))return;if(commitWork(()=>{const now=Date.now();currentTask().end=now;data.workday.end=now;data.workdays.push(data.workday);data.deleteEligibility.workday=data.workday.id;data.workday=null;}))$('workDone').showModal();};
+document.querySelectorAll('[data-task]').forEach(b=>b.onclick=()=>{if(!data.workday||data.active||currentTask().type==='Break'||currentTask().type===b.dataset.task)return;if(b.dataset.task==='Route')$('startBtn').click();else commitWork(()=>switchTask(b.dataset.task,Date.now()));});
 $('endBreak').onclick=()=>{if(currentTask()&&currentTask().type==='Break'&&Date.now()-currentTask().start>=1800000)commitWork(()=>switchTask('Unassigned',Date.now()));};
 let taskOpen=false,routeOpen=true,ledgerSignature='';
 const expandedLedger=new Set();
 $('taskCollapse').onclick=()=>{taskOpen=!taskOpen;renderWork();};
 $('routeCollapse').onclick=()=>{routeOpen=!routeOpen;renderWork();};
-function renderWork(){const w=data.workday,t=currentTask(),onBreak=t&&t.type==='Break';$('workBtn').textContent=w?'END WORKDAY':'START WORKDAY';$('workBtn').className=w?'end':'start';$('workBtn').disabled=!!data.active||!!onBreak;$('workStatus').hidden=!w;$('workStatus').textContent=w?`Started ${timeText(w.start)} • ${t.type} • Paid ${duration(paidMs(w))}`:'';document.querySelectorAll('[data-task]').forEach(b=>{b.disabled=!w||!!data.active||!!onBreak;b.classList.toggle('nr-selected',!!t&&b.dataset.task===t.type);});$('endBtn').hidden=!data.active;$('breakPanel').hidden=!onBreak;if(onBreak){const remaining=Math.max(0,1800000-(Date.now()-t.start));$('breakTimer').textContent=timer(remaining);$('endBreak').disabled=remaining>0;}$('taskHistory').hidden=!taskOpen;$('taskCollapse').textContent=taskOpen?'⌃':'⌄';$('taskCollapse').setAttribute('aria-expanded',String(taskOpen));$('routeHistory').hidden=!routeOpen;$('viewAllBtn').hidden=!routeOpen;$('routeCollapse').textContent=routeOpen?'⌃':'⌄';$('routeCollapse').setAttribute('aria-expanded',String(routeOpen));if(taskOpen)renderLedger();}
+function renderWork(){const preset=data.savedRoutes.find(r=>r.id===data.selectedRouteId);document.querySelector('[data-task="Route"]').textContent=preset?'Route '+preset.number:'Route';const w=data.workday,t=currentTask(),onBreak=t&&t.type==='Break';$('workBtn').textContent=w?'END WORKDAY':'START WORKDAY';$('workBtn').className=w?'end':'start';$('workBtn').disabled=!!data.active||!!onBreak;$('workStatus').hidden=!w;$('workStatus').textContent=w?`Started ${timeText(w.start)} • ${data.active?"Route "+data.active.routeNumber:t.type} • Paid ${duration(paidMs(w))}`:'';document.querySelectorAll('[data-task]').forEach(b=>{b.disabled=!w||!!data.active||!!onBreak;b.classList.toggle('nr-selected',!!t&&b.dataset.task===t.type);});$('workBtn').hidden=!!data.active;$('taskButtons').hidden=!!data.active;$('routeModeControls').hidden=!data.active;if(data.active){$('arrivalBtn').disabled=!!data.active.arrival;$('departureBtn').disabled=!!data.active.departure;$('arrivalBtn').textContent=data.active.arrival?'✓ Arrival '+timeText(data.active.arrival):'📍 Arrival';$('departureBtn').textContent=data.active.departure?'✓ Departure '+timeText(data.active.departure):'🚚 Departure';}$('breakPanel').hidden=!onBreak;if(onBreak){const remaining=Math.max(0,1800000-(Date.now()-t.start));$('breakTimer').textContent=timer(remaining);$('endBreak').disabled=remaining>0;}$('taskHistory').hidden=!taskOpen;$('taskCollapse').textContent=taskOpen?'⌃':'⌄';$('taskCollapse').setAttribute('aria-expanded',String(taskOpen));$('routeHistory').hidden=!routeOpen;$('viewAllBtn').hidden=!routeOpen;$('routeCollapse').textContent=routeOpen?'⌃':'⌄';$('routeCollapse').setAttribute('aria-expanded',String(routeOpen));if(taskOpen)renderLedger();}
 function nrNode(tag,text,cls){const e=document.createElement(tag);if(text!=null)e.textContent=text;if(cls)e.className=cls;return e;}
 function compactDay(ts){const d=new Date(ts);return ['S2','M','T','W','T2','F','S'][d.getDay()]+'.'+'JFMAMJJASOND'[d.getMonth()]+d.getDate()+'.'+String(d.getFullYear()).slice(-2);}
 function ledgerGroup(parent,key,label){const d=nrNode('details',null,'nr-ledger-group');d.open=expandedLedger.has(key);d.appendChild(nrNode('summary',label));d.ontoggle=()=>{if(d.open)expandedLedger.add(key);else expandedLedger.delete(key);};parent.appendChild(d);return d;}
 function ledgerLine(parent,name,value,route){const e=nrNode(route?'button':'div',null,'nr-ledger-line');e.append(nrNode('strong',name),nrNode('small',value));if(route){e.type='button';e.onclick=()=>showReport(route);}parent.appendChild(e);}
-function renderLedger(){const signature=JSON.stringify([data.workdays,data.routes,data.settings.weekStart]);if(signature===ledgerSignature)return;ledgerSignature=signature;const root=$('taskHistory');root.replaceChildren();const months={},weeks={};const sorted=data.workdays.slice().sort((a,b)=>b.start-a.start);if(!sorted.length)root.appendChild(nrNode('p','No completed workdays yet.','empty'));sorted.forEach(w=>{const bounds=weekBounds(w.start),start=new Date(bounds[0]),month=start.getFullYear()+'-'+start.getMonth(),week=String(bounds[0]);if(!months[month])months[month]=ledgerGroup(root,'m'+month,start.toLocaleDateString('en-CA',{month:'long',year:'numeric'}));if(!weeks[week])weeks[week]=ledgerGroup(months[month],'w'+week,start.toLocaleDateString('en-CA',{month:'short',day:'numeric'})+' – '+new Date(bounds[1]-1).toLocaleDateString('en-CA',{month:'short',day:'numeric'}));const day=ledgerGroup(weeks[week],'d'+w.id,compactDay(w.start)+'    Total Paid Hours: '+duration(paidMs(w)));ledgerLine(day,'1. Start Workday',timeText(w.start));w.tasks.forEach((t,i)=>{const n=i+2,r=data.routes.find(r=>r.id===t.routeId);if(r){ledgerLine(day,n+'a. Route '+r.routeNumber,timeText(r.start)+' | '+r.startKm.toLocaleString()+' KM',r);ledgerLine(day,n+'b. Route '+r.routeNumber,timeText(r.end)+' | '+r.endKm.toLocaleString()+' KM',r);}else ledgerLine(day,n+'. '+t.type,timeText(t.start)+' | '+timeText(t.end));});ledgerLine(day,(w.tasks.length+2)+'. End Workday',timeText(w.end));});}
-$('editWorkBtn').onclick=()=>{if(data.workday||data.active){alert('Finish the active workday first.');return;}const w=data.workdays.slice().sort((a,b)=>b.end-a.end)[0];if(!w){alert('No completed workdays.');return;}const root=$('workEditFields');root.replaceChildren();w.tasks.forEach((t,i)=>{const row=nrNode('div',null,'nr-edit-row');const select=nrNode('select');['Unassigned','Package Handler','Training','Vehicle Movement','Break','Janitorial','Route 6184'].filter(x=>t.routeId?x==='Route 6184':x!=='Route 6184').forEach(x=>{const o=nrNode('option',x);o.value=x;select.appendChild(o);});select.value=t.type;select.disabled=!!t.routeId;const start=nrNode('input'),end=nrNode('input');[start,end].forEach(e=>{e.type='datetime-local';e.required=true;e.disabled=!!t.routeId;});start.value=toLocalDateTimeInput(t.start);end.value=toLocalDateTimeInput(t.end);row.append(select,nrNode('label','Start'),start,nrNode('label','End'),end);root.appendChild(row);});$('workEditDialog').showModal();};
+function renderLedger(){const signature=JSON.stringify([data.workdays,data.routes,data.settings.weekStart,!!data.workday,!!data.active,data.deleteEligibility]);if(signature===ledgerSignature)return;ledgerSignature=signature;const root=$('taskHistory');root.replaceChildren();const months={},weeks={};const sorted=data.workdays.slice().sort((a,b)=>b.start-a.start);if(!sorted.length)root.appendChild(nrNode('p','No completed workdays yet.','empty'));sorted.forEach(w=>{const bounds=weekBounds(w.start,0),start=new Date(bounds[0]),month=start.getFullYear()+'-'+start.getMonth(),week=String(bounds[0]);if(!months[month])months[month]=ledgerGroup(root,'m'+month,start.toLocaleDateString('en-CA',{month:'long',year:'numeric'}));if(!weeks[week])weeks[week]=ledgerGroup(months[month],'w'+week,start.toLocaleDateString('en-CA',{month:'short',day:'numeric'})+' – '+new Date(bounds[1]-1).toLocaleDateString('en-CA',{month:'short',day:'numeric'}));const day=ledgerGroup(weeks[week],'d'+w.id,compactDay(w.start)+'    Total Paid Hours: '+duration(paidMs(w)));ledgerLine(day,'1. Start Workday',timeText(w.start));w.tasks.forEach((t,i)=>{const n=i+2,r=data.routes.find(r=>r.id===t.routeId);if(r){ledgerLine(day,n+'a. Route '+r.routeNumber,timeText(r.start)+' | '+r.startKm.toLocaleString()+' KM | '+(r.arrival?timeText(r.arrival):'—'),r);(r.topUps||[]).slice().sort((a,b)=>a.at-b.at).forEach((u,k)=>ledgerLine(day,n+' Top Up '+(k+1),timeText(u.at)+(u.notes?' | '+u.notes:''),r));ledgerLine(day,n+'b. Route '+r.routeNumber,timeText(r.end)+' | '+r.endKm.toLocaleString()+' KM | '+(r.departure?timeText(r.departure):'—'),r);}else ledgerLine(day,n+'. '+t.type,timeText(t.start)+' | '+timeText(t.end));});ledgerLine(day,(w.tasks.length+2)+'. End Workday',timeText(w.end));if(canDeleteRecord('workday',w.id)){day.querySelector('summary').appendChild(deleteControl('workday',w.id));}});}
+
+$('editWorkBtn').onclick=()=>{if(data.workday||data.active){alert('Finish the active workday first.');return;}const w=data.workdays.slice().sort((a,b)=>b.end-a.end)[0];if(!w){alert('No completed workdays.');return;}const root=$('workEditFields');root.replaceChildren();w.tasks.forEach((t,i)=>{const row=nrNode('div',null,'nr-edit-row');const select=nrNode('select');(t.routeId?[t.type]:['Unassigned','Package Handler','Training','Vehicle Movement','Break','Janitorial','Post-Trip Inspection']).forEach(x=>{const o=nrNode('option',x);o.value=x;select.appendChild(o);});select.value=t.type;select.disabled=!!t.routeId;const start=nrNode('input'),end=nrNode('input');[start,end].forEach(e=>{e.type='datetime-local';e.required=true;e.disabled=!!t.routeId;});start.value=toLocalDateTimeInput(t.start);end.value=toLocalDateTimeInput(t.end);row.append(select,nrNode('label','Start'),start,nrNode('label','End'),end);root.appendChild(row);});$('workEditDialog').showModal();};
 $('workEditForm').onsubmit=e=>{e.preventDefault();if(data.workday||data.active)return;const w=data.workdays.slice().sort((a,b)=>b.end-a.end)[0];if(!w)return;const tasks=Array.from($('workEditFields').children).map((row,i)=>{const t=w.tasks[i],inputs=row.querySelectorAll('input');const parse=(v,old)=>v===toLocalDateTimeInput(old)?old:new Date(v).getTime();return Object.assign({},t,{type:row.querySelector('select').value,start:parse(inputs[0].value,t.start),end:parse(inputs[1].value,t.end)});});if(tasks.some((t,i)=>!Number.isFinite(t.start)||!Number.isFinite(t.end)||t.end<t.start||(i&&t.start!==tasks[i-1].end)||(t.type==='Break'&&t.end-t.start<1800000))){alert('Tasks must be consecutive, ordered and non-overlapping. Breaks must be at least 30 minutes.');return;}if(!confirm('Save corrected workday?'))return;if(commitWork(()=>{w.tasks=tasks;w.start=tasks[0].start;w.end=tasks[tasks.length-1].end;}))$('workEditDialog').close();};
 function downloadNR(content,name,type){const url=URL.createObjectURL(new Blob([content],{type}));const a=nrNode('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);}
 function backupText(){return JSON.stringify(data,null,2);}
 $('backupBtn').onclick=()=>$('backupDialog').showModal();
 $('downloadBackup').onclick=()=>downloadNR(backupText(),'NightReapers-backup.json','application/json');
-function workReport(){return data.workdays.map(w=>dateText(w.start)+' | Paid '+duration(paidMs(w))+'\n'+w.tasks.map(t=>{const r=data.routes.find(r=>r.id===t.routeId);return t.type+' '+timeText(t.start)+' – '+timeText(t.end)+(r?' | '+r.startKm+' – '+r.endKm+' KM':'');}).join('\n')).join('\n\n')+'\n\nROUTES\n'+data.routes.map(r=>dateText(r.start)+' Route '+r.routeNumber+' '+timeText(r.start)+' – '+timeText(r.end)+' | '+r.startKm+' – '+r.endKm+' KM').join('\n');}
+function workReport(){return data.workdays.map(w=>dateText(w.start)+' | Paid '+duration(paidMs(w))+'\n'+w.tasks.map(t=>{const r=data.routes.find(r=>r.id===t.routeId);return (r?'Route '+r.routeNumber:t.type)+' '+timeText(t.start)+' – '+timeText(t.end)+(r?' | '+r.startKm+' – '+r.endKm+' KM':'');}).join('\n')).join('\n\n')+'\n\nROUTES\n'+data.routes.map(r=>dateText(r.start)+' Route '+r.routeNumber+' '+timeText(r.start)+' – '+timeText(r.end)+' | '+r.startKm+' – '+r.endKm+' KM').join('\n');}
 async function emailNR(report){const content=report?workReport():backupText(),name=report?'NightReapers-work-report.txt':'NightReapers-backup.json',type=report?'text/plain':'application/json';if(!report&&!confirm('Full backup contains private pay information. Continue?'))return;const file=new File([content],name,{type});if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:name});return;}catch(e){if(e.name==='AbortError')return;}}downloadNR(content,name,type);alert('File downloaded. Attach it manually in your email app.');location.href='mailto:'+encodeURIComponent($('backupEmail').value.trim())+'?subject='+encodeURIComponent(name);}
 $('emailBackup').onclick=()=>emailNR(false);$('emailReport').onclick=()=>emailNR(true);
 $('importBackup').onchange=()=>{const input=$('importBackup'),file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const x=JSON.parse(reader.result);if(!x||!Array.isArray(x.routes)||!x.settings||!Number.isFinite(Number(x.settings.rate))||!Number.isInteger(Number(x.settings.weekStart))||Number(x.settings.weekStart)<0||Number(x.settings.weekStart)>6||x.routes.some(r=>!r||!r.id||!Number.isFinite(r.start)||!Number.isFinite(r.end)||r.end<r.start||!Number.isFinite(r.startKm)||!Number.isFinite(r.endKm)||r.endKm<r.startKm))throw Error('Invalid route or settings data');if(x.workdays!=null&&!Array.isArray(x.workdays))throw Error('Invalid workdays');const validWork=w=>w&&Number.isFinite(w.start)&&Array.isArray(w.tasks)&&w.tasks.length&&w.tasks.every((t,i)=>t&&Number.isFinite(t.start)&&(t.end==null?i===w.tasks.length-1&&w.end==null:Number.isFinite(t.end)&&t.end>=t.start)&&(!i||t.start===w.tasks[i-1].end));if((x.workdays||[]).some(w=>!validWork(w)||!Number.isFinite(w.end))||(x.workday&&!validWork(x.workday)))throw Error('Invalid workday timeline');if(data.workday||data.active)throw Error('Finish active work before restoring');if(!confirm('Replace current records with this backup? A safety copy will be saved first.'))return;localStorage.setItem(STORAGE_KEY+'_preimport',backupText());downloadNR(backupText(),'NightReapers-before-import.json','application/json');localStorage.setItem(STORAGE_KEY,JSON.stringify(x));location.reload();}catch(e){alert('Import failed: '+e.message);}finally{input.value='';}};reader.readAsText(file);};
+$('arrivalBtn').onclick=()=>{if(data.active&&!data.active.arrival&&!data.active.departure&&confirm('Record arrival now?'))commitWork(()=>{data.active.arrival=Date.now();});};
+$('departureBtn').onclick=()=>{if(data.active&&!data.active.departure&&confirm('Record departure now?'))commitWork(()=>{data.active.departure=Date.now();});};
+$('topUpBtn').onclick=()=>{if(!data.active)return;const notes=prompt('Record fuel top up now? Optional notes:','');if(notes!==null)commitWork(()=>{(data.active.topUps||(data.active.topUps=[])).push({at:Date.now(),notes:notes.trim()});});};
 setInterval(render,1000);render();

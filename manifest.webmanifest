@@ -2,7 +2,7 @@
 {
   "name": "NightReapers",
   "short_name": "NightReapers",
-  "description": "Personal workday, task and route logger",
+  "description": "Personal route and shift logger",
   "id": "/NightReapers-v1/",
   "start_url": "/NightReapers-v1/",
   "scope": "/NightReapers-v1/",
